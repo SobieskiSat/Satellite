@@ -28,7 +28,9 @@ bool BMP280::begin()
 	{
 		startMeasurment();
 		updateDelay = minDelay;
+		packetSize = 10;
 		//sendLog("sin", *this); // sin - succesful initialization
+		
 		Initialized = true;
 		return true;
 	}
@@ -74,6 +76,11 @@ bool BMP280::update()
 			Pressure = (float)dPressure;
 			Altitude = 44330 * (1.0 - pow(Pressure / 1013.25, 0.1903));
 			
+			SDbuffer += String(Pressure, 7) + " " + String(Temperature, 7) + " @" + String(millis());
+			SDbuffer += "\r\n";
+			
+			packetCount++;
+			IsPacketReady();
 			lastUpdate = millis();
 			return true;
 		}
@@ -121,8 +128,6 @@ bool BMP280::startMeasurment()
 	if (result) return true; // everything fine
 	else return false; // there was a problem communicating with the BMP
 }
-
-float BMP280::readValue() { update(); return Pressure; }
 
 char BMP280::getUnPT(double &uP, double &uT)
 {

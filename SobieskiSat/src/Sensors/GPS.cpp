@@ -13,7 +13,7 @@ bool GPS::begin()
 {
 	gps.begin(9600);
 	gps.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
-	gps.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);   // 1 Hz update rate
+	gps.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);  
 	gps.sendCommand(PGCMD_ANTENNA);
 
 	delay(1000);
@@ -22,6 +22,7 @@ bool GPS::begin()
 	
 	minDelay = 0;
 	updateDelay = 0;
+	packetSize = 5;
 	fileName = "GPS.txt";
 }
 
@@ -42,11 +43,16 @@ bool GPS::update()
 			HardwareClock.update();
 			updateRecievedDate();
 			
+			SDbuffer += String(Latitude, 7) + " " + String(Longitude, 7) + " " + String(Altitude, 7) + " " + RecievedDate.getString() + " @" + String(millis());
+			SDbuffer += "\r\n";
+			
+			packetCount++;
+			IsPacketReady();
 			return true;
 		}
 	}
 	
-	if (!Initialized && gps.fix && gpsAnyZero())
+	if (!Initialized && gps.fix /*&& gpsAnyZero()*/)
 	{
 		HardwareClock.begin(RecievedDate);
 		updateRecievedDate();
@@ -61,8 +67,6 @@ bool GPS::update()
 	}
 	return false;
 }
-
-float GPS::readValue() { return 0; }
 
 bool GPS::gpsAnyZero()
 {

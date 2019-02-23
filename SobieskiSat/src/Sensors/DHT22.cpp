@@ -48,8 +48,6 @@ bool DHT22::update()
 	return false;
 }
 
-float DHT22::readValue() { update(); return Humidity; }
-
 long DHT22::levelTime(byte level, int firstWait, int interval)
 {
     unsigned long time_start = micros();

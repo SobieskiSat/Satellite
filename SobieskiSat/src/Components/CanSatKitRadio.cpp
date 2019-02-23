@@ -317,7 +317,7 @@ bool Radio::begin() {
   if(version != 0x12) {
     SPI.end();
     if (debug_enabled) {
-      //SerialUSB.println("[radio] Not responding!");
+      SerialUSB.println("[radio] Not responding!");
     }
     return false;
   }
@@ -381,7 +381,7 @@ void Radio::disable_debug() {
 
 void set_mode(Mode mode_) {
   if (debug_enabled) {
-    //SerialUSB.print("[radio] change mode ");
+    SerialUSB.print("[radio] change mode ");
   }
   
   mode = mode_;
@@ -390,7 +390,7 @@ void set_mode(Mode mode_) {
   
   if (mode == Mode::Transmit) {
     if (debug_enabled) {
-      //SerialUSB.println("to TX");
+      SerialUSB.println("to TX");
     }
     setMode(SX1278_STANDBY);
 
@@ -398,7 +398,7 @@ void set_mode(Mode mode_) {
     
   } else if (mode == Mode::Receive) {    
     if (debug_enabled) {
-      //SerialUSB.println("to RX");
+      SerialUSB.println("to RX");
     }
     write_register(SX1278_REG_DIO_MAPPING_1, SX1278_DIO0_RX_DONE, 7, 4);
     
@@ -430,14 +430,14 @@ void radio_interrupt() {
       setMode(SX1278_TX);
     } else {
       if (debug_enabled) {
-        //SerialUSB.println("[radio] cleared TX queue");
+        SerialUSB.println("[radio] cleared TX queue");
       }
       set_mode(Mode::Receive);
     }
   } else if (mode == Mode::Receive) {
     if (read_register(SX1278_REG_IRQ_FLAGS, 5, 5) == SX1278_CLEAR_IRQ_FLAG_PAYLOAD_CRC_ERROR) {
       if (debug_enabled) {
-        //SerialUSB.println("[radio] CRC fail!");
+        SerialUSB.println("[radio] CRC fail!");
       }
       return;
     }
@@ -455,7 +455,7 @@ void radio_interrupt() {
       }
     } else {
       if (debug_enabled) {
-        //SerialUSB.println("[radio] RX buffer full!");
+        SerialUSB.println("[radio] RX buffer full!");
       }
     } 
   }
@@ -484,13 +484,13 @@ bool Radio::transmit(String str) {
 bool Radio::transmit(const uint8_t* data, uint8_t length) {
   if (length == 0) {
     if (debug_enabled) {
-      //SerialUSB.println("[radio] empty frame!");
+      SerialUSB.println("[radio] empty frame!");
     }
     return false;
   }
   if (fifo_tx.free_space() < length+1u) {
     if (debug_enabled) {
-      //SerialUSB.println("[radio] TX buffer full!");
+      SerialUSB.println("[radio] TX buffer full!");
     }
     return false;
   }
@@ -511,7 +511,7 @@ bool Radio::transmit(const uint8_t* data, uint8_t length) {
   
   if (mode_switch) {
     if (debug_enabled) {
-      //SerialUSB.println("[radio] force interrupt");
+      SerialUSB.println("[radio] force interrupt");
     }
     radio_interrupt();
   }

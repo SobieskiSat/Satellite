@@ -7,24 +7,12 @@
 #include <HardwareSerial.h>
 #include "../src/Structures/Clock.h"
 #include "../src/Structures/Time.h"
+#include "Sps30/sensirion_arch_config.h"
+#include "Sps30/sps30.h"
+#include <SparkFunMPU9250-DMP.h>
 
 namespace SobieskiSat
 {
-	class LM35 : public Sensor
-	{
-		public:
-		LM35();
-		LM35(int pin_);
-		
-		float Temperature;
-		
-		bool begin();
-		bool update();
-		float readValue();
-		
-		private:
-		int pin = A1;
-	};
 	
 	class BMP280 : public Sensor
 	{
@@ -37,13 +25,12 @@ namespace SobieskiSat
 		
 		bool begin();
 		bool update();
-		float readValue();
 		
 		private:
 		
 		short oversampling;
 		double dTemperature, dPressure;
-		double dig_T1, dig_T2 , dig_T3 , dig_T4 , dig_P1, dig_P2 , dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig_P8, dig_P9;
+		double dig_T1, dig_T2, dig_T3, dig_T4, dig_P1, dig_P2, dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig_P8, dig_P9;
 		double t_fine;
 		
 		bool startMeasurment();
@@ -65,7 +52,6 @@ namespace SobieskiSat
 		
 		bool begin();
 		bool update();
-		float readValue();
 		
 		int read2(float* ptemperature, float* phumidity, byte pdata[40]);
 		
@@ -95,7 +81,6 @@ namespace SobieskiSat
 		
 		bool begin();
 		bool update();
-		float readValue();
 		
 		Adafruit_GPS gps;
 		
@@ -103,6 +88,45 @@ namespace SobieskiSat
 		
 		bool gpsAnyZero();
 		void updateRecievedDate();
+	};
+	
+	class SPS30 : public Sensor
+	{
+		public:
+		SPS30();
+		
+		float PM1_0;
+		float PM2_5;
+		float PM4_0;
+		float PM10_0;
+		
+		bool begin();
+		bool update();
+		
+		private:
+		
+		struct sps30_measurement measurement;
+		s16 ret;
+		
+	};
+	
+	class MPU : public Sensor
+	{
+		public:
+		MPU();
+		
+		float Gyro[3];
+		float Accel[3];
+		float Mag[3];
+		float Quat[4];
+		
+		bool begin();
+		bool update();
+		
+		private:
+		
+		MPU9250_DMP imu;
+		
 	};
 	
 #define BMP280_ADDR 0x76
@@ -130,3 +154,22 @@ namespace SobieskiSat
 };
 
 #endif
+
+/*
+
+	class LM35 : public Sensor
+	{
+		public:
+		LM35();
+		LM35(int pin_);
+		
+		float Temperature;
+		
+		bool begin();
+		bool update();
+		float readValue();
+		
+		private:
+		int pin = A1;
+	};
+*/
