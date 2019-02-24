@@ -1,9 +1,10 @@
 #include "Sensors.h"
+#include "Arduino.h"
 #include <SparkFunMPU9250-DMP.h>
 
 using namespace SobieskiSat;
 
-MPU::MPU() { ID = 'I'; }
+MPU::MPU() { ID = 'M'; }
 
 bool MPU::begin()
 {
@@ -15,6 +16,7 @@ bool MPU::begin()
 		packetSize = 10;
 		updateDelay = minDelay;
 		Initialized = true;
+		return true;
 	}
 	return false;
 }
@@ -49,12 +51,20 @@ bool MPU::update()
 			SDbuffer += String(Quat[0], 7) + " " + String(Quat[1], 7) + " " + String(Quat[2], 7) + " " + String(Quat[3], 7) + " @" + String(millis());
 			SDbuffer += "\r\n";
 
-		
-			packetCount++;
-			IsPacketReady();
 			lastUpdate = millis();
+			
+			SerialUSB.println(listReadings());
+			
 			return true;
 		}
 	}
 	return false;
+}
+
+String MPU::listReadings()
+{
+	return "Angles: " + String(Gyro[0], 2) + " " + String(Gyro[1], 2) + " " + String(Gyro[2], 2)
+    + " Accels: " + String(Accel[0], 2) + " " + String(Accel[1], 2) + " " + String(Accel[2], 2)
+	+ " Mag: " + String(Mag[0], 2) + " " + String(Mag[1], 2) + " " + String(Mag[2], 2)
+	+ " Quat: " + String(Quat[0], 7) + " " + String(Quat[1], 7) + " " + String(Quat[2], 7) + " " + String(Quat[3], 7);
 }

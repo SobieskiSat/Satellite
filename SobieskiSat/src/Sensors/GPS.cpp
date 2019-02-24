@@ -45,9 +45,9 @@ bool GPS::update()
 			
 			SDbuffer += String(Latitude, 7) + " " + String(Longitude, 7) + " " + String(Altitude, 7) + " " + RecievedDate.getString() + " @" + String(millis());
 			SDbuffer += "\r\n";
+
+			SerialUSB.println(listReadings());
 			
-			packetCount++;
-			IsPacketReady();
 			return true;
 		}
 	}
@@ -66,6 +66,11 @@ bool GPS::update()
 		return true;
 	}
 	return false;
+}
+
+String GPS::listReadings()
+{
+	return "Latitude: " + String(Latitude, 7) + " Longitude: " + String(Longitude, 7) + " Altitude: " + String(Altitude, 2);
 }
 
 bool GPS::gpsAnyZero()

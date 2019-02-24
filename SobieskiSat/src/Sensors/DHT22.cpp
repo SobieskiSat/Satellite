@@ -1,4 +1,5 @@
 #include "Sensors.h"
+#include "Arduino.h"
 
 #define DHT22_pin 3
 
@@ -21,9 +22,6 @@ bool DHT22::begin()
 	Initialized = true;
 	Initialized = update();
 	
-	//if (Initialized) sendLog("sin", *this); // sin - succesful initialization
-	//else sendLog("uin", *this); // uin - unsuccesful initialization
-	
 	return Initialized;
 }
 
@@ -41,11 +39,22 @@ bool DHT22::update()
 		Temperature = (float)((temperature & 0x8000 ? -1 : 1) * (temperature & 0x7FFF)) / 10.0;
 		Humidity = (float)humidity / 10.0;
 		
+		SDbuffer += String(Humidity, 1) + " " + String(Temperature, 1) + " @" + String(millis());
+		SDbuffer += "\r\n";
+		
 		lastUpdate = millis();
+		
+		SerialUSB.println(listReadings());
+		
 		return true;
 	}
 	
 	return false;
+}
+
+String DHT22::listReadings()
+{
+	return "Humidity: " + String(Humidity, 1) + " Temperature: " + String(Temperature, 1);
 }
 
 long DHT22::levelTime(byte level, int firstWait, int interval)

@@ -13,13 +13,14 @@ namespace SobieskiSat
 		String SDbuffer;
 		String fileName;
 		char ID;
-		bool newLog = true;
-		bool packetReady = false;
+		//bool newLog = true;
+		//bool packetReady = false;
 		
 		bool begin();
 		bool update();
 		bool setUpdateDelay(int ms);
 		void SDbufferClear();
+		String listReadings();
 		//void loadToSDBuffer(std::initializer_list<float> inputs);
 		//void (*sendLog)(String message, Sensor& sender);
 		
@@ -30,7 +31,7 @@ namespace SobieskiSat
 		int minDelay;
 		int packetSize;
 		int packetCount;
-		bool IsPacketReady();
+		//bool IsPacketReady();
 	};
 };
 

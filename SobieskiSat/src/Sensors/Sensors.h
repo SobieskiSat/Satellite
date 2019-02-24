@@ -25,6 +25,7 @@ namespace SobieskiSat
 		
 		bool begin();
 		bool update();
+		String listReadings();
 		
 		private:
 		
@@ -49,6 +50,7 @@ namespace SobieskiSat
 		
 		float Humidity;
 		float Temperature;
+		String listReadings();
 		
 		bool begin();
 		bool update();
@@ -72,8 +74,8 @@ namespace SobieskiSat
 		public:
 		GPS();
 
-		float Latitude;
-		float Longitude;
+		float Latitude = 50.448214;
+		float Longitude = 21.796410;
 		float Altitude;
 		String LastNMEA;
 		Clock HardwareClock;
@@ -81,6 +83,7 @@ namespace SobieskiSat
 		
 		bool begin();
 		bool update();
+		String listReadings();
 		
 		Adafruit_GPS gps;
 		
@@ -102,6 +105,7 @@ namespace SobieskiSat
 		
 		bool begin();
 		bool update();
+		String listReadings();
 		
 		private:
 		
@@ -122,6 +126,7 @@ namespace SobieskiSat
 		
 		bool begin();
 		bool update();
+		String listReadings();
 		
 		private:
 		

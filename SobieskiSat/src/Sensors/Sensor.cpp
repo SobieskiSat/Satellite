@@ -19,9 +19,9 @@ bool Sensor::setUpdateDelay(int ms)
 void Sensor::SDbufferClear()
 {
 	SDbuffer = "";
-	packetReady = false;
+	//packetReady = false;
 }
-
+/*
 bool Sensor::IsPacketReady()
 {
 	if (packetCount >= packetSize)
@@ -32,7 +32,7 @@ bool Sensor::IsPacketReady()
 	}
 	return false;
 }
-
+*/
 /*
 void Sensor::loadToSDBuffer(std::initializer_list<float> inputs)
 {

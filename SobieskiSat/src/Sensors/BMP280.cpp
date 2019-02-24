@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include <stdio.h>
 #include <math.h>
+#include "Arduino.h"
 
 using namespace SobieskiSat;
 
@@ -29,14 +30,12 @@ bool BMP280::begin()
 		startMeasurment();
 		updateDelay = minDelay;
 		packetSize = 10;
-		//sendLog("sin", *this); // sin - succesful initialization
 		
 		Initialized = true;
 		return true;
 	}
 	else
 	{
-		//sendLog("uin", *this); // uin - unsuccesful initialization
 		return false;
 	}
 }
@@ -78,14 +77,19 @@ bool BMP280::update()
 			
 			SDbuffer += String(Pressure, 7) + " " + String(Temperature, 7) + " @" + String(millis());
 			SDbuffer += "\r\n";
-			
-			packetCount++;
-			IsPacketReady();
 			lastUpdate = millis();
+			
+			SerialUSB.println(listReadings());
+			
 			return true;
 		}
 	}
 	return false;
+}
+
+String BMP280::listReadings()
+{
+	return "Pressure: " + String(Pressure, 3) + " Temperature: " + String(Temperature, 3);
 }
 
 bool BMP280::startMeasurment()

@@ -1,4 +1,5 @@
 #include "Sensors.h"
+#include "Arduino.h"
 #include "Sps30/sensirion_uart.h"
 #include "Sps30/sps30.h"
 
@@ -20,6 +21,7 @@ bool SPS30::begin()
 			packetSize = 3;
 			updateDelay = minDelay;
 			Initialized = true;
+			lastUpdate = millis() + 10000;
 			return true;
 		}
 		delay(1000);
@@ -44,10 +46,16 @@ bool SPS30::update()
 		SDbuffer += String(PM1_0, 4) + " " + String(PM2_5, 4) + " " + String(PM4_0) + " " + String(PM10_0) + " @" + String(millis());
 		SDbuffer += "\r\n";
 		
-		packetCount++;
-		IsPacketReady();
 		lastUpdate = millis();
+		
+		SerialUSB.println(listReadings());
+		
 		return true;
 	}
 	return false;
+}
+
+String SPS30::listReadings()
+{
+	return "PM1_0: " + String(PM1_0) + " PM2_5: " + String(PM2_5) + " PM4_0: " + String(PM4_0) + " PM10_0: " + String(PM10_0);
 }
