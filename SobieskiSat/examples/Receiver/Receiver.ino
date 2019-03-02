@@ -45,4 +45,5 @@ void loop() {
                     String(compressor.retrieve("Temperature").value, compressor.retrieve("Temperature").decimals) + "_" +
                     String(compressor.retrieve("PM2_5").value, compressor.retrieve("PM2_5").decimals) + "_" +
                     String(compressor.retrieve("PM10_0").value, compressor.retrieve("PM10_0").decimals));
+  compressor.clear();
 }
