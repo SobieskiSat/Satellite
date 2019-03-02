@@ -4,6 +4,7 @@
 #include <HardwareSerial.h>
 #include "../src/Structures/Clock.h"
 #include "../src/Structures/Time.h"
+#include "../src/SobieskiSat.h"
 
 using namespace SobieskiSat;
 
@@ -43,10 +44,11 @@ bool GPS::update()
 			HardwareClock.update();
 			updateRecievedDate();
 			
-			SDbuffer += String(Latitude, 7) + " " + String(Longitude, 7) + " " + String(Altitude, 7) + " " + RecievedDate.getString() + " @" + String(millis());
-			SDbuffer += "\r\n";
-
-			SerialUSB.println(listReadings());
+				SDbuffer += String(Latitude, 7) + " " + String(Longitude, 7) + " " + String(Altitude, 7) + " " + RecievedDate.getString() + " @" + String(millis());
+				SDbuffer += "\r\n";
+			
+			
+			//logger.addToBuffer(listReadings(), true);
 			
 			return true;
 		}
@@ -63,6 +65,7 @@ bool GPS::update()
 		Longitude = gps.longitudeDegrees;
 		Altitude = gps.altitude;
 		LastNMEA = gps.lastNMEA();
+		//logger.addToBuffer("[" + String(ID) + "] I " + (Initialized == true ? "1" : "0") + " @" + millis() + "\r\n");
 		return true;
 	}
 	return false;

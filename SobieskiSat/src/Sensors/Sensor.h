@@ -22,7 +22,7 @@ namespace SobieskiSat
 		void SDbufferClear();
 		String listReadings();
 		//void loadToSDBuffer(std::initializer_list<float> inputs);
-		//void (*sendLog)(String message, Sensor& sender);
+		static bool (*sendLog)(String message, Sensor& sender);
 		
 		protected:
 		

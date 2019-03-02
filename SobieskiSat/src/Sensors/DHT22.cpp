@@ -1,7 +1,11 @@
 #include "Sensors.h"
 #include "Arduino.h"
+#include "../src/SobieskiSat.h"
+#include "../src/Components/Logger.h"
 
 #define DHT22_pin 3
+
+//extern Logger logger;
 
 using namespace SobieskiSat;
 
@@ -22,6 +26,10 @@ bool DHT22::begin()
 	Initialized = true;
 	Initialized = update();
 	
+	lastUpdate =  millis() + 3000;
+	
+	//logger.addToBuffer("[" + String(ID) + "] I " + (Initialized == true ? "1" : "0") + " @" + millis() + "\r\n");
+	
 	return Initialized;
 }
 
@@ -38,13 +46,13 @@ bool DHT22::update()
 
 		Temperature = (float)((temperature & 0x8000 ? -1 : 1) * (temperature & 0x7FFF)) / 10.0;
 		Humidity = (float)humidity / 10.0;
-		
+
 		SDbuffer += String(Humidity, 1) + " " + String(Temperature, 1) + " @" + String(millis());
 		SDbuffer += "\r\n";
 		
 		lastUpdate = millis();
 		
-		SerialUSB.println(listReadings());
+		//logger.addToBuffer(listReadings(), true);
 		
 		return true;
 	}

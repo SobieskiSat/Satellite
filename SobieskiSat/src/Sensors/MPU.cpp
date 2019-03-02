@@ -1,6 +1,7 @@
 #include "Sensors.h"
 #include "Arduino.h"
 #include <SparkFunMPU9250-DMP.h>
+#include "../src/SobieskiSat.h"
 
 using namespace SobieskiSat;
 
@@ -8,6 +9,7 @@ MPU::MPU() { ID = 'M'; }
 
 bool MPU::begin()
 {
+	Initialized = false;
 	if (imu.begin() == INV_SUCCESS)
 	{
 		imu.dmpBegin(DMP_FEATURE_6X_LP_QUAT | DMP_FEATURE_GYRO_CAL, 10);
@@ -16,9 +18,9 @@ bool MPU::begin()
 		packetSize = 10;
 		updateDelay = minDelay;
 		Initialized = true;
-		return true;
 	}
-	return false;
+	//logger.addToBuffer("[" + String(ID) + "] I " + (Initialized == true ? "1" : "0") + " @" + millis() + "\r\n");
+	return Initialized;
 }
 
 bool MPU::update()
@@ -44,16 +46,17 @@ bool MPU::update()
 			Mag[1] = imu.calcMag(imu.my);
 			Mag[2] = imu.calcMag(imu.mz);
 			
+		
+				SDbuffer += String(Gyro[0], 7) + " " + String(Gyro[1], 7) + " " + String(Gyro[2], 7) + " ";
+				SDbuffer += String(Accel[0], 7) + " " + String(Accel[1], 7) + " " + String(Accel[2], 7) + " ";
+				SDbuffer += String(Mag[0], 7) + " " + String(Mag[1], 7) + " " + String(Mag[2], 7) + " ";
+				SDbuffer += String(Quat[0], 7) + " " + String(Quat[1], 7) + " " + String(Quat[2], 7) + " " + String(Quat[3], 7) + " @" + String(millis());
+				SDbuffer += "\r\n";
 			
-			SDbuffer += String(Gyro[0], 7) + " " + String(Gyro[1], 7) + " " + String(Gyro[2], 7) + " ";
-			SDbuffer += String(Accel[0], 7) + " " + String(Accel[1], 7) + " " + String(Accel[2], 7) + " ";
-			SDbuffer += String(Mag[0], 7) + " " + String(Mag[1], 7) + " " + String(Mag[2], 7) + " ";
-			SDbuffer += String(Quat[0], 7) + " " + String(Quat[1], 7) + " " + String(Quat[2], 7) + " " + String(Quat[3], 7) + " @" + String(millis());
-			SDbuffer += "\r\n";
 
 			lastUpdate = millis();
 			
-			SerialUSB.println(listReadings());
+			//logger.addToBuffer(listReadings(), true);
 			
 			return true;
 		}

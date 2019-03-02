@@ -9,11 +9,11 @@
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
+
 using namespace SobieskiSat;
 
-
 // FIFO for 10 frames
-FIFO<uint8_t, 2571> fifo_tx, fifo_rx;
+FIFO<std::uint8_t, 2571> fifo_tx, fifo_rx;
 
 static int pin_cs, pin_dio0;
 static float frequency_in_mhz;
@@ -292,6 +292,12 @@ enum class Mode {
 };
 void set_mode(Mode);
 
+bool Radio::empty()
+{
+	//return fifo_tx.free_space() == 2571 ? true : false;
+	return fifo_tx.size() == 0 ? true : false;
+}
+
 Radio::Radio(int pin_cs_, int pin_dio0_, float frequency_in_mhz_, Bandwidth bandwidth_, SpreadingFactor spreadingFactor_, CodingRate codingRate_) {
   pin_cs = pin_cs_;
   pin_dio0 = pin_dio0_;
@@ -299,11 +305,6 @@ Radio::Radio(int pin_cs_, int pin_dio0_, float frequency_in_mhz_, Bandwidth band
   bandwidth = bandwidth_;
   spreadingFactor = spreadingFactor_;
   codingRate = codingRate_;
-}
-
-bool Radio::empty()
-{
-	return fifo_tx.size() == 0 ? true : false;
 }
 
 bool Radio::begin() {
@@ -363,7 +364,6 @@ bool Radio::begin() {
   attachInterrupt(digitalPinToInterrupt(pin_dio0), radio_interrupt, HIGH);
   
   set_mode(Mode::Receive);
-  //set_mode(Mode::Transmit);
   
   return true;
 }
@@ -433,7 +433,7 @@ void radio_interrupt() {
       if (debug_enabled) {
         SerialUSB.println("[radio] cleared TX queue");
       }
-      //set_mode(Mode::Receive);
+      set_mode(Mode::Receive);
     }
   } else if (mode == Mode::Receive) {
     if (read_register(SX1278_REG_IRQ_FLAGS, 5, 5) == SX1278_CLEAR_IRQ_FLAG_PAYLOAD_CRC_ERROR) {

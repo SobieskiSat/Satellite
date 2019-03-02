@@ -1,8 +1,10 @@
 #include "Sensors.h"
+#include "Sensor.h"
 #include <Wire.h>
 #include <stdio.h>
 #include <math.h>
 #include "Arduino.h"
+#include "../src/SobieskiSat.h"
 
 using namespace SobieskiSat;
 
@@ -10,6 +12,7 @@ BMP280::BMP280() { ID = 'B'; }
 
 bool BMP280::begin()
 {
+	Initialized = false;
 	Wire.begin();
 	fileName = "BMP280.txt";
 	oversampling = 4;
@@ -32,12 +35,9 @@ bool BMP280::begin()
 		packetSize = 10;
 		
 		Initialized = true;
-		return true;
 	}
-	else
-	{
-		return false;
-	}
+	//logger.addToBuffer("[" + String(ID) + "] I " + (Initialized == true ? "1" : "0") + " @" + millis() + "\r\n");
+	return Initialized;
 }
 
 bool BMP280::update()
@@ -75,11 +75,11 @@ bool BMP280::update()
 			Pressure = (float)dPressure;
 			Altitude = 44330 * (1.0 - pow(Pressure / 1013.25, 0.1903));
 			
-			SDbuffer += String(Pressure, 7) + " " + String(Temperature, 7) + " @" + String(millis());
-			SDbuffer += "\r\n";
+				SDbuffer += String(Pressure, 7) + " " + String(Temperature, 7) + " @" + String(millis());
+				SDbuffer += "\r\n";
 			lastUpdate = millis();
 			
-			SerialUSB.println(listReadings());
+			//(*Sensor::sendLog)(listReadings(), *this);
 			
 			return true;
 		}

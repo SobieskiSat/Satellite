@@ -12,16 +12,19 @@ namespace SobieskiSat
 	{
 		public:
 		
-		String buffer;
+		bool Initialized = false;
+		bool printUSB = true;
 		
 		bool begin();
 		bool save(Sensor& sensor);
 		bool saveBuffer();
-		//bool logSensor(String message, Sensor& sender);
+		void addToBuffer(String str, bool onlyUSB = false);
+		bool logSensor(String message, Sensor& sender);
 		
 		private:
 		
 		String rootDir;
+		String buffer;
 	};
 	
 	#define SD_pin 11

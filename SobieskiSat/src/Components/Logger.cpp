@@ -10,6 +10,7 @@ using namespace SobieskiSat;
 
 bool Logger::begin()
 {
+	Initialized = false;
 	if (SD.begin(SD_pin))
 	{
 		File sessions = SD.open("SESSIONS.TXT");
@@ -22,6 +23,7 @@ bool Logger::begin()
 				sessions.close();
 				SD.mkdir("0");
 				rootDir = "0/";
+				Initialized = true;
 				return true;
 			}
 			else return false;
@@ -37,6 +39,7 @@ bool Logger::begin()
 			sessions.close();
 			SD.mkdir(String(sessionNo));
 			rootDir = String(sessionNo) + "/";
+			Initialized = true;
 			return true;
 		}
 		
@@ -47,6 +50,8 @@ bool Logger::begin()
 
 bool Logger::save(Sensor& sensor)
 {
+	if (Initialized)
+	{
 	if (sensor.SDbuffer != "")
 	{
 		File file = SD.open(rootDir + sensor.fileName, FILE_WRITE);
@@ -59,15 +64,29 @@ bool Logger::save(Sensor& sensor)
 		}
 		return false;
 	}
+	}
 	return false;
 }
-/*
+
 bool Logger::logSensor(String message, Sensor& sender)
 {
 	buffer += "[" + String(sender.ID) + "] " + message + "\r\n";
 	SerialUSB.println("[" + String(sender.ID) + "] " + message);
 }
-*/
+
+void Logger::addToBuffer(String str, bool onlyUSB)
+{
+	if (onlyUSB)
+	{
+		if (printUSB) SerialUSB.println(str);
+		return;
+	}
+	else
+	{
+		if (Initialized) buffer += str;
+		if (printUSB) SerialUSB.println(str);
+	}
+}
 
 bool Logger::saveBuffer()
 {

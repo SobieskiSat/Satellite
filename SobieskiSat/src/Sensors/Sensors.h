@@ -7,13 +7,15 @@
 #include <HardwareSerial.h>
 #include "../src/Structures/Clock.h"
 #include "../src/Structures/Time.h"
+#include "../src/Components/Logger.h"
+#include "../src/SobieskiSat.h"
 #include "Sps30/sensirion_arch_config.h"
 #include "Sps30/sps30.h"
 #include <SparkFunMPU9250-DMP.h>
 
 namespace SobieskiSat
 {
-	
+
 	class BMP280 : public Sensor
 	{
 		public:
@@ -26,6 +28,7 @@ namespace SobieskiSat
 		bool begin();
 		bool update();
 		String listReadings();
+		//static bool (*Sensor::sendLog)(String message, Sensor& sender);
 		
 		private:
 		
