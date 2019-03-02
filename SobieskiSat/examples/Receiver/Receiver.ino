@@ -5,8 +5,7 @@ using namespace SobieskiSat;
 // set radio receiver parameters - see comments below
 // remember to set the same radio parameters in
 // transmitter and receiver boards!
-Radio radio(Pins::Radio::ChipSelect,
-            Pins::Radio::DIO0,
+Radio radio(10, 12,
             433.0,                  // frequency in MHz
             Bandwidth_125000_Hz,    // bandwidth - check with CanSat regulations to set allowed value
             SpreadingFactor_9,      // see provided presentations to determine which setting is the best
