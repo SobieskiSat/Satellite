@@ -39,7 +39,6 @@ DataPacket Compressor::retrieve(String name)
 		int startBit;
 		int endBit;
 		DataPacket found = find(name, startBit, endBit);
-		SerialUSB.println("Found: " + name + " " + String(startBit) + " " + String(endBit));
 		unsigned int unbitten = 0;
 		int endByte = endBit / 8;
 		bool finished = false;
