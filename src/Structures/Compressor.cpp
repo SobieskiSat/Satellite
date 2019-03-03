@@ -1,6 +1,7 @@
 #include "Compressor.h"
 #include "Arduino.h"
 #include <math.h>
+#include "../src/Sensors/Sensor.h"
 
 using namespace SobieskiSat;
 

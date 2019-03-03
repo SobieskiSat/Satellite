@@ -3,6 +3,7 @@
 
 #include "Arduino.h"
 #include "DataPacket.h"
+#include "../src/Sensors/Sensor.h"
 
 namespace SobieskiSat
 {
