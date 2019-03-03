@@ -22,8 +22,10 @@ bool DHT22::begin()
 	minDelay = 2000;
 	fileName = "DHT22.txt";
 	updateDelay = minDelay;
+	lastUpdate = 0;
 	
 	Initialized = true;
+	delay(minDelay);
 	Initialized = update();
 	
 	lastUpdate =  millis() + 3000;
