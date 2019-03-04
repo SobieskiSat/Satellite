@@ -137,6 +137,7 @@ namespace SobieskiSat
 		
 	};
 	
+	
 #define BMP280_ADDR 0x76
 #define	BMP280_REG_CONTROL 0xF4
 #define	BMP280_REG_RESULT_PRESSURE 0xF7

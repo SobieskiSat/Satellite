@@ -1,5 +1,5 @@
-#ifndef CANSATKITLIBRARY_RadioH_
-#define CANSATKITLIBRARY_RadioH_
+#ifndef SOBIESKISATLIBRARY_RadioH_
+#define SOBIESKISATLIBRARY_RadioH_
 
 #include <cstdint>
 

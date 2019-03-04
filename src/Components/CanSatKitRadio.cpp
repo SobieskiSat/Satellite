@@ -301,11 +301,6 @@ Radio::Radio(int pin_cs_, int pin_dio0_, float frequency_in_mhz_, Bandwidth band
   codingRate = codingRate_;
 }
 
-bool Radio::empty()
-{
-	return fifo_tx.size() == 0 ? true : false;
-}
-
 bool Radio::begin() {
   pinMode(pin_dio0, INPUT);
   pinMode(pin_cs, OUTPUT);
@@ -359,13 +354,17 @@ bool Radio::begin() {
   
   clearIRQFlags();
   
-  SPI.usingInterrupt(digitalPinToInterrupt(2));
+  SPI.usingInterrupt(digitalPinToInterrupt(pin_dio0));
   attachInterrupt(digitalPinToInterrupt(pin_dio0), radio_interrupt, HIGH);
   
   set_mode(Mode::Receive);
-  //set_mode(Mode::Transmit);
   
   return true;
+}
+
+bool Radio::empty()
+{
+	return fifo_tx.size() == 0 ? true : false;
 }
 
 // ALL modes
@@ -433,7 +432,7 @@ void radio_interrupt() {
       if (debug_enabled) {
         SerialUSB.println("[radio] cleared TX queue");
       }
-      //set_mode(Mode::Receive);
+      set_mode(Mode::Receive);
     }
   } else if (mode == Mode::Receive) {
     if (read_register(SX1278_REG_IRQ_FLAGS, 5, 5) == SX1278_CLEAR_IRQ_FLAG_PAYLOAD_CRC_ERROR) {

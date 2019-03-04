@@ -10,6 +10,7 @@
 #include "Structures/Time.h"
 #include "Arduino.h"
 #include "Structures/Compressor.h"
+#include "Music/Player.h"
 
 namespace SobieskiSat {
 	

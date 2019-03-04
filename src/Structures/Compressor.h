@@ -15,15 +15,14 @@ namespace SobieskiSat
 		void attach(DataPacket packet);
 		DataPacket retrieve(String name);
 		
-		int packetSize = 47;
-		char data[47];
+		int packetSize = 16;
+		char data[16];
 		bool generateFormat = false;
 		String format = "";
-		
-		private:
-		
 		// index of last bit in data
 		int index = 0;
+		
+		private:
 		
 		DataPacket find(String name, int &startBit, int &endBit);
 		

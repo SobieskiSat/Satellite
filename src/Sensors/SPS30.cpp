@@ -47,7 +47,7 @@ bool SPS30::update()
 		PM4_0 = measurement.mc_4p0;
 		PM10_0 = measurement.mc_10p0;
 		
-			SDbuffer += String(PM1_0, 4) + " " + String(PM2_5, 4) + " " + String(PM4_0) + " " + String(PM10_0) + " @" + String(millis());
+			SDbuffer += String(PM1_0, 4) + " " + String(PM2_5, 4) + " " + String(PM4_0, 4) + " " + String(PM10_0, 4) + " @" + String(millis());
 			SDbuffer += "\r\n";
 				
 		lastUpdate = millis();
