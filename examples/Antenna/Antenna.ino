@@ -145,7 +145,7 @@ void loop() {
   delay(30);                       // wait for a second
   digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
   
-
+  compressor.clear();
   for (int i = 0; i < 16; i++)
   {
     compressor.data[i] = data[i];
