@@ -97,6 +97,11 @@ DataPacket Compressor::find(String name, int& startBit, int& endBit)
 			}
 		}
 	}
+	if (format[ind] == 'X')
+	{
+		SerialUSB.println("unable to find: " + name);
+		return DataPacket("", 0, 0, 0, 0, 0);
+	}
 	startBit = current[0].toInt();
 	endBit = current[1].toInt();
 	return DataPacket(current[2], current[3].toFloat(), current[4].toFloat(), current[5].toInt(), current[6].toInt(), -1);
