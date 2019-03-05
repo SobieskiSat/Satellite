@@ -79,7 +79,7 @@ namespace SobieskiSat
 
 		float Latitude = 50.448214;
 		float Longitude = 21.796410;
-		float Altitude;
+		float Altitude = 1;
 		String LastNMEA;
 		Clock HardwareClock;
 		Time RecievedDate;

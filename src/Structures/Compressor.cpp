@@ -9,11 +9,10 @@ void Compressor::clear()
 {
 	for (int i = 0; i < packetSize; i++)
 	{
-		data[i] = B00000000;
+		data[i] = 0b00000000;
 	}
 	index = 0;
-	if (generateFormat) format += "X";
-	generateFormat = false;
+	if (format != "") generateFormat = false;
 }
 
 void Compressor::attach(DataPacket packet)

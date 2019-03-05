@@ -24,7 +24,7 @@ Radio radio(10, 12,
             SpreadingFactor_9,      // see provided presentations to determine which setting is the best
             CodingRate_4_8);        // see provided presentations to determine which setting is the best
 Compressor compressor;
-
+bool led_state = true;
 
 int package_num=0; //zmienna przechowująca liczbę pakietów odebranych (!)
 
@@ -111,9 +111,10 @@ if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64 ZMI
   }  
   // start radio module  
   radio.begin();
-  compressor.generateFormat = false;
+  
   compressor.clear();
   compressor.format = "0_26_Latitude_49.0000000_54.5000000_2_7 26_53_Longitude_14.0699997_24.0900002_2_7 53_67_Altitude_0.0_1000.0_4_1 67_90_Pressure_600.0000_1200.0000_4_4 90_103_Temperature_-20.00_50.00_2_2 103_113_PM25_0.0_100.0_3_1 113_123_PM100_0.0_100.0_3_1 X";
+
 //OLED
   display.clearDisplay();
   display.display();
@@ -141,18 +142,20 @@ void loop() {
 
   // receive data and save it to string
   radio.receive(data);
-   digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(30);                       // wait for a second
-  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-  
+
+  digitalWrite(13, led_state);
+  led_state = !led_state;
+
   compressor.clear();
+  // get and print signal level (rssi) 
+  //SERIAL PRINT
   for (int i = 0; i < 16; i++)
   {
     compressor.data[i] = data[i];
   }
-  // get and print signal level (rssi) 
-  //SERIAL PRINT
-  SerialUSB.println(String(radio.get_rssi_last()) + "_" +
+
+  int rssi = radio.get_rssi_last();
+  SerialUSB.println(String(rssi) + "_" +
                     String(compressor.retrieve("Latitude").value, compressor.retrieve("Latitude").decimals) + "_" + 
                     String(compressor.retrieve("Longitude").value, compressor.retrieve("Longitude").decimals) + "_" +
                     String(compressor.retrieve("Altitude").value, compressor.retrieve("Altitude").decimals) + "_" +
@@ -160,14 +163,21 @@ void loop() {
                     String(compressor.retrieve("Temperature").value, compressor.retrieve("Temperature").decimals) + "_" +
                     String(compressor.retrieve("PM25").value, compressor.retrieve("PM25").decimals) + "_" +
                     String(compressor.retrieve("PM100").value, compressor.retrieve("PM100").decimals));
+  
+  //SerialUSB.println(String(compressor.data));
   //OLED PRINT  
+
   display.clearDisplay();
+  
+  display.setTextSize(2);             // Normal 1:1 pixel scale
   display.setCursor(0, 0);
   display.print("RSSI: ");
-  display.println(radio.get_rssi_last());
+  display.println(rssi);
   
   display.print("H: ");
   display.println(String(compressor.retrieve("Altitude").value));
+
+  display.setTextSize(1);             // Normal 1:1 pixel scale
 
   display.print("Packs: ");
   display.println(String(package_num));
