@@ -18,6 +18,14 @@ long lastEmpty;
 bool catchedEmpty = false;
 bool state = true;
 bool doGenerate = true;
+bool catchedGPS = false;
+float maxHeight = -1;
+bool isStatic = false;
+bool doBeep = false;
+long beepTimer;
+int lastGPS[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+int compareIndex = 0;
+long gpsTimer;
 
 Compressor compressor;
 Player buzzer;
@@ -61,6 +69,12 @@ void loop() {
   sps.update();
   dht.update();
 
+  if (gps.Initialized && !catchedGPS)
+  {
+    catchedGPS = true;
+    logger.addToBuffer("Recieved real time: " + gps.RecievedDate.getString());
+  }
+
   buzzer.update();
   
   if (radio.empty() && !catchedEmpty)
@@ -71,7 +85,6 @@ void loop() {
   
   if (radio.empty() && millis() - lastEmpty > 30 && catchedEmpty)
   { 
-      //radio.clear();
       SerialUSB.println("Radio sending");
 
       compressor.clear();
@@ -107,5 +120,56 @@ void loop() {
     delay(10);
 
     tone(5, 540, 40);
+  }
+
+  if (gps.Initialized = true && millis() - gpsTimer > 1000 && !doBeep)
+  {
+    if (compareIndex < 10)
+    {
+      lastGPS[compareIndex] = (int)gps.Altitude;
+      compareIndex++;
+    }
+    else
+    {
+      for (int i = 1; i < 10; i++)
+      {
+        lastGPS[i] = lastGPS[i - 1];
+      }
+      lastGPS[0] = (int)gps.Altitude;
+
+      int differences = 0;
+      for (int i = 1; i < 10; i++)
+      {
+        differences += lastGPS[i] - lastGPS[i - 1];
+      }
+      if (abs(differences) < 1 && !isStatic)
+      {
+        isStatic = true;
+        logger.addToBuffer("Can is static");
+      }
+      else if (isStatic)
+      {
+        logger.addToBuffer("Can is not static");
+        isStatic = false;
+      }
+
+    }
+    gpsTimer = millis();
+  }
+
+  if (gps.Initialized = true && gps.Altitude > maxHeight && gps.Altitude > 0 && gps.Altitude < 1000 && !doBeep)
+  {
+    maxHeight = gps.Altitude;
+  }
+  if (millis() > 1000 * 60 * 5 && maxHeight - gps.Altitude > 30 && isStatic && !doBeep)
+  {
+    doBeep = true;
+    logger.addToBuffer("Detected landing");
+  }
+
+  if (doBeep && millis() - beepTimer > 1000)
+  {
+    beepTimer = millis();
+    tone(5, 600, 750);
   }
 }
