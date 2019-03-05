@@ -11,7 +11,7 @@
 #include "../src/SobieskiSat.h"
 #include "Sps30/sensirion_arch_config.h"
 #include "Sps30/sps30.h"
-#include <SparkFunMPU9250-DMP.h>
+//#include <SparkFunMPU9250-DMP.h>
 
 namespace SobieskiSat
 {
@@ -116,7 +116,7 @@ namespace SobieskiSat
 		s16 ret;
 		
 	};
-	
+	/*
 	class MPU : public Sensor
 	{
 		public:
@@ -136,7 +136,7 @@ namespace SobieskiSat
 		MPU9250_DMP imu;
 		
 	};
-	
+	*/
 	
 #define BMP280_ADDR 0x76
 #define	BMP280_REG_CONTROL 0xF4
