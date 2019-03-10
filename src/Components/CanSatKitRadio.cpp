@@ -362,11 +362,6 @@ bool Radio::begin() {
   return true;
 }
 
-bool Radio::empty()
-{
-	return fifo_tx.size() == 0 ? true : false;
-}
-
 // ALL modes
 
 
@@ -523,6 +518,10 @@ bool Radio::transmit(const uint8_t* data, uint8_t length) {
 
 void Radio::flush() {
   while (mode != Mode::Receive);
+}
+
+bool Radio::tx_fifo_empty() {
+  return fifo_tx.size() == 0;
 }
 
 

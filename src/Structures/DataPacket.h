@@ -19,7 +19,7 @@ namespace SobieskiSat
 			numbers = numbers_;
 			decimals = decimals_;
 			value = value_;
-			
+			/*
 			if (value > upperLimit)
 			{
 				SerialUSB.println(name + " is above range, assigned overflow value.");
@@ -33,6 +33,7 @@ namespace SobieskiSat
 				//state = State.overflow;
 			}
 			//else state = State.normal;
+			*/
 		};
 		
 		String name;

@@ -1,5 +1,5 @@
-#ifndef SOBIESKISATLIBRARY_RadioH_
-#define SOBIESKISATLIBRARY_RadioH_
+#ifndef CANSATKITLIBRARY_RadioH_
+#define CANSATKITLIBRARY_RadioH_
 
 #include <cstdint>
 
@@ -141,6 +141,13 @@ class Radio {
    */
   static void flush();
   
+  /**
+   * @brief Checks if transmit fifo is empty, which means that radio module is sending last frame or is idle.
+   *
+   * @return `true` if transmit fifo is empty
+   */
+  static bool tx_fifo_empty();
+
 
   /**
    * @brief Get number of frames in receive buffer
@@ -176,8 +183,6 @@ class Radio {
    * @return int RSSI in dBm
    */
   static int get_rssi_now();
-  
-  static bool empty();
 };
 
 constexpr static auto Bandwidth_7800_Hz = Radio::Bandwidth::_7800_Hz;
