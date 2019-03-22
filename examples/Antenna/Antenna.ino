@@ -177,8 +177,8 @@ void loop() {
   display.println(String(compressor.retrieve("Altitude").value));
 
   display.print("P: ");
-  display.println(String(int(compressor retrieve("PackNo").value)+ " " + String(package_num) + " " + String(package_num % 32));
-                        );
+  display.println(String(int(compressor.retrieve("PackNo").value))+ " " + String(package_num) + " " + String(package_num % 32));
+                        
 
   display.print("T: ");
   display.println(String(compressor.retrieve("Temperature").value));
