@@ -29,10 +29,12 @@ long gpsTimer;
 long aliveTimer;
 bool outsideCan = false;
 int packetNo = 0;
+long photoTimer;
 
 Compressor compressor;
 Player buzzer;
 int photo = A2;
+String photoBuffer;
 
 void setup() {
   SerialUSB.begin(115200);
@@ -68,6 +70,12 @@ void setup() {
 
 void loop() {
 
+  if(millis() - photoTimer >= 250)
+    {
+    photoTimer = millis();
+    photoBuffer += String(analogRead(photo));
+    }
+  
   if (!catchedEmpty)
   {
     gps.update();
@@ -119,6 +127,9 @@ void loop() {
   {
     delay(10);
     SerialUSB.println("SD saving");
+    
+    logger.addToBuffer(photoBuffer);
+    photoBuffer = "";
     logger.save(gps);
     logger.save(bmp);
     logger.save(sps);
