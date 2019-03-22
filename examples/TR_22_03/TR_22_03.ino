@@ -158,6 +158,6 @@ void loop() {
   if (doBeep && millis() - beepTimer > 1000)
   {
     beepTimer = millis();
-    tone(5, 600, 750);
+    tone(5, 440, 750);
   }
 }
