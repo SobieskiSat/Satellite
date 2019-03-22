@@ -173,14 +173,15 @@ void loop() {
   display.setCursor(0, 0);
   display.print("RSSI: ");
   display.println(rssi);
-  
   display.print("H: ");
   display.println(String(compressor.retrieve("Altitude").value));
 
-  display.setTextSize(1);             // Normal 1:1 pixel scale
+  display.print("P: ");
+  display.println(String(int(compressor retrieve("PackNo").value)+ " " + String(package_num) + " " + String(package_num % 32));
+                        );
 
-  display.print("Packs: ");
-  display.println(String(package_num));
+  display.print("T: ");
+  display.println(String(compressor.retrieve("Temperature").value));
   
   display.display();
   
