@@ -27,10 +27,12 @@ int lastGPS[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 int compareIndex = 0;
 long gpsTimer;
 long aliveTimer;
+bool outsideCan = false;
+int packetNo = 0;
 
 Compressor compressor;
 Player buzzer;
-int photo = A0;
+int photo = A2;
 
 void setup() {
   SerialUSB.begin(115200);
@@ -100,9 +102,12 @@ void loop() {
       compressor.attach(DataPacket("Temperature", -20, 50, 2, 2, bmp.Temperature));
       compressor.attach(DataPacket("PM25", 0, 100, 3, 1, sps.PM2_5));
       compressor.attach(DataPacket("PM100", 0, 100, 3, 1, sps.PM10_0));
+      compressor.attach(DataPacket('PackNo', 0, 32, 2, 0, packetNo);
 
       radio.transmit(compressor.data);
-      
+      packetNo++;
+      if (packetNo >= 32) packetNo = 0;
+                        
       digitalWrite(13, state);
       state = !state;
 
