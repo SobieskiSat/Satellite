@@ -87,7 +87,7 @@ void loop() {
       catchedEmpty = true;
   }
   
-  if (radio.tx_fifo_empty() && millis() - lastEmpty > 30 && catchedEmpty)
+  if (radio.tx_fifo_empty() && millis() - lastEmpty > 40 && catchedEmpty)
   { 
       SerialUSB.println("Radio sending");
 
