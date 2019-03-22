@@ -4,7 +4,7 @@
 
 using namespace SobieskiSat;
 
-//Radio radio(10, 12, 433.0, Bandwidth_500000_Hz, SpreadingFactor_7, CodingRate_4_8);
+
 Radio radio(10, 12, 433.0, Bandwidth_125000_Hz, SpreadingFactor_9, CodingRate_4_8);
 
 Logger logger;
@@ -30,6 +30,7 @@ long aliveTimer;
 
 Compressor compressor;
 Player buzzer;
+int photo = A0;
 
 void setup() {
   SerialUSB.begin(115200);
@@ -78,7 +79,7 @@ void loop() {
     catchedGPS = true;
   }
 
-  //buzzer.update();
+
   
   if (radio.tx_fifo_empty() && !catchedEmpty)
   {
@@ -109,7 +110,7 @@ void loop() {
       delay(20);
   }
 
-  if (millis() - lastSave > 5000 && !catchedEmpty)
+  if (millis() - lastSave > 2500 && !catchedEmpty)
   {
     delay(10);
     SerialUSB.println("SD saving");
