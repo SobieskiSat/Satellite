@@ -102,7 +102,7 @@ void loop() {
       compressor.attach(DataPacket("Temperature", -20, 50, 2, 2, bmp.Temperature));
       compressor.attach(DataPacket("PM25", 0, 100, 3, 1, sps.PM2_5));
       compressor.attach(DataPacket("PM100", 0, 100, 3, 1, sps.PM10_0));
-      compressor.attach(DataPacket('PackNo', 0, 32, 2, 0, packetNo);
+      compressor.attach(DataPacket("PackNo", 0, 32, 2, 0, packetNo);
 
       radio.transmit(compressor.data);
       packetNo++;
