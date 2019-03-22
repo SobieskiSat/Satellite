@@ -1,6 +1,6 @@
 #include <SobieskiSat.h>
-#include <SPI.h>
-#include <SD.h>
+
+
 
 using namespace SobieskiSat;
 
