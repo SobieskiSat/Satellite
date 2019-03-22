@@ -149,7 +149,7 @@ void loop() {
   {
     maxHeight = gps.Altitude;
   }
-  if ((millis() > 1000 * 60 * 5 || ( maxHeight - gps.Altitude > 30)) && !doBeep)
+  if ((millis() > 1000 * 60 * 4 || ( maxHeight - gps.Altitude > 30)) && !doBeep)
   {
     doBeep = true;
     //logger.addToBuffer("Detected landing");
