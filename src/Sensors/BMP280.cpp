@@ -36,7 +36,7 @@ bool BMP280::begin()
 		
 		Initialized = true;
 	}
-	//logger.addToBuffer("[" + String(ID) + "] I " + (Initialized == true ? "1" : "0") + " @" + millis() + "\r\n");
+	
 	return Initialized;
 }
 
@@ -75,12 +75,10 @@ bool BMP280::update()
 			Pressure = (float)dPressure;
 			Altitude = 44330 * (1.0 - pow(Pressure / 1013.25, 0.1903));
 			
-				SDbuffer += String(Pressure, 7) + " " + String(Temperature, 7) + " @" + String(millis());
-				SDbuffer += "\r\n";
+			SDbuffer += String(Pressure, 7) + " " + String(Temperature, 7) + " @" + String(millis());
+			SDbuffer += "\r\n";
+				
 			lastUpdate = millis();
-			
-			//(*Sensor::sendLog)(listReadings(), *this);
-			
 			return true;
 		}
 	}
@@ -89,7 +87,7 @@ bool BMP280::update()
 
 String BMP280::listReadings()
 {
-	return "Pressure: " + String(Pressure, 3) + " Temperature: " + String(Temperature, 3);
+	return "Pressure: " + String(Pressure, PREC_PRE) + " Temperature: " + String(Temperature, PREC_TEM);
 }
 
 bool BMP280::startMeasurment()

@@ -8,34 +8,32 @@ using namespace SobieskiSat;
 
 MQ9::MQ9()
 {
-	pin = PIN_MQ9;
 	analogReadResolution(12);
 	ID = 'L';
+	Initialized = false;
 }
 		
 bool MQ9::begin()
 {
-	Initialized = false;
-	minDelay = 0;
 	fileName = "MQ9.txt";
+	minDelay = 0;
+	setUpdateDelay(UPD_MQ9);
 	
-	float lastTemperature = 1000;
+	float lastReading = 1000;
 	int errorCounter = 0;
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 20; i++)
 	{ 
-		lastTemperature = Temperature;
-		update();
-		if (i > 2 && (lastTemperature - Temperature > 10 || lastTemperature - Temperature < -10))
-			errorCounter++;
-		delay(1);
+		lastReading = AirQuality;
+		AirQuality = analogRead(PIN_MQ9);
+		if (i > 2 && (lastReading - AirQuality > 20 || lastReading - AirQuality < -20)) errorCounter++;
+		delay(10);
 	}
 	if (errorCounter > 10)
 	{
-		//sendLog("uin", *this); // uin - unsuccesful initialization
+		Initialized = false;
 		return false;
 	}
-			
-	//sendLog("sin", *this); // sin - succesful initialization
+	
 	Initialized = true;
 	return true;
 }
@@ -44,8 +42,7 @@ bool MQ9::update()
 {
 	if (millis() - lastUpdate > updateDelay && Initialized)
 	{
-		Temperature = 100.0 * (analogRead(pin) * 3.3 / (std::pow(2, 12)));
-		//loadToSDBuffer({Temperature});
+		AirQuality = analogRead(PIN_MQ9);
 		
 		lastUpdate = millis();
 		return true;
@@ -53,4 +50,7 @@ bool MQ9::update()
 	else return false;
 }
 		
-float MQ9::readValue() { update(); return Temperature; }
+String BMP280::listReadings()
+{
+	return "AirQuality: " + String(AirQuality, PREC_AIR);
+}
