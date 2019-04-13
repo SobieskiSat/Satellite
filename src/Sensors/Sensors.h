@@ -116,6 +116,19 @@ namespace SobieskiSat
 		s16 ret;
 		
 	};
+	
+	class MQ9
+	{
+		public:
+		MQ9();
+		
+		float AirQuality;
+		
+		bool begin();
+		bool update();
+		String listReadings();
+	};
+	
 	/*
 	class MPU : public Sensor
 	{

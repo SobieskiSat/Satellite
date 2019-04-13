@@ -11,8 +11,11 @@ namespace SobieskiSat
 	{
 		public:
 		
+		void begin();
 		void clear();
 		void attach(DataPacket packet);
+		void set(char *_data);
+		
 		DataPacket retrieve(String name);
 		
 		int packetSize = 16;

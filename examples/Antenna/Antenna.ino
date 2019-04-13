@@ -3,200 +3,143 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
-
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
-#define OLED_RESET     4 // Reset pin # (or -1 if sharing Arduino reset pin)
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-
-#define NUMFLAKES     10 // Number of snowflakes in the animation example
+#include "logo.h"
+#include "compressor_formats.h"
 
 using namespace SobieskiSat;
 
-// set radio receiver parameters - see comments below
-// remember to set the same radio parameters in
-// transmitter and receiver boards!
-Radio radio(10, 12,
-            433.0,                  // frequency in MHz
-            Bandwidth_125000_Hz,    // bandwidth - check with CanSat regulations to set allowed value
-            SpreadingFactor_9,      // see provided presentations to determine which setting is the best
-            CodingRate_4_8);        // see provided presentations to determine which setting is the best
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Radio radio(10, 12, 433.0, Bandwidth_125000_Hz, SpreadingFactor_9, CodingRate_4_8);
 Compressor compressor;
-bool led_state = true;
+Logger logger;
 
-int package_num=0; //zmienna przechowująca liczbę pakietów odebranych (!)
+int sendNum = 0;  // numer wysłanego pakietu
+int reciNum = 0;  // numer otrzymanego pakietu
+int rssi = 0;     // rssi ostatniej transmisji
+GPS gps;          // obiekty fantomów sensorów przechowujące ostatio otrzymane dane
+BMP280 bmp;
+SPS30 sps;
+int battery = 0;  // poziom baterii (analog)
+MQ9 mq9;          // (analog)
+DHT22 dht;
 
-//---------------------------------------------OLED_START_LOGO---------------------------
-#define LOGO_HEIGHT   64
-#define LOGO_WIDTH    64
-static const unsigned char PROGMEM logo_bmp[] =
-{ B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000000, B11110000, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000001, B11000000, B00000000, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000000, B00000000, B00001000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000111, B11100000, B00000010, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B01111111, B11111110, B00000000, B00000000, B00000000, 
-  B00000000, B00000010, B00000011, B11111111, B11111111, B11000000, B00000000, B00000000, 
-  B00000000, B00000100, B00001111, B11111111, B11111111, B11110000, B00000000, B00000000, 
-  B00000000, B00001000, B00011111, B11111111, B11111111, B11111000, B00000000, B00000000, 
-  B00000000, B00000000, B01111111, B11111111, B11111111, B11111110, B00000000, B00000000, 
-  B00000000, B00000000, B11111111, B11111111, B11111111, B11111111, B00000100, B00000000, 
-  B00000000, B00000001, B11111111, B00000000, B00000000, B11111111, B10000010, B00000000, 
-  B00000000, B00000011, B11110000, B00000000, B00000000, B00001111, B11000000, B00000000, 
-  B00000000, B00000111, B11000000, B00000000, B00000000, B00000011, B11100000, B00000000, 
-  B00000000, B00000110, B00000000, B00000000, B00000000, B00000000, B01100000, B00000000, 
-  B00000001, B00001100, B00000000, B00111111, B11111100, B00000000, B00110000, B00000000, 
-  B00000000, B00010000, B00000111, B11111111, B11111111, B11100000, B00001000, B00000000, 
-  B00000010, B00010000, B00011111, B11111111, B11111111, B11111000, B00001000, B00000000, 
-  B00000000, B00110000, B01111111, B11111111, B11111111, B11111110, B00001100, B00000000, 
-  B00000000, B00110000, B11111111, B11111111, B11111111, B11111111, B00001100, B00000000, 
-  B00000000, B00110000, B11100000, B00010000, B00001000, B00000111, B00001100, B00100000, 
-  B00000000, B01110000, B11100000, B00010000, B00001000, B00000111, B00001110, B00000000, 
-  B00000000, B01110000, B11100111, B11110011, B11001111, B00111111, B00001110, B00000000, 
-  B00000000, B01110000, B01100000, B00010000, B00001111, B00111110, B00001110, B00000000, 
-  B00000000, B01110000, B01100000, B00010000, B00001111, B00111110, B00001110, B00000000, 
-  B00001000, B11111000, B01111111, B10010011, B11001111, B00111110, B00011111, B00000000, 
-  B00001000, B11111000, B01100000, B00010011, B11001111, B00111110, B00011111, B00000000, 
-  B00001000, B11111000, B00100000, B00010011, B11001111, B00111100, B00011111, B00000000, 
-  B00001000, B11111000, B00111111, B11111111, B11111111, B11111100, B00011111, B00000000, 
-  B00001000, B11111100, B00111111, B11111111, B11111111, B11111100, B00111111, B00000000, 
-  B00000000, B11111100, B00011111, B11111111, B11111111, B11111000, B00111111, B00000000, 
-  B00000000, B01111110, B00011111, B11111111, B11111111, B11111000, B01111110, B00010000, 
-  B00000000, B01111110, B00001111, B11111110, B01111111, B11110000, B01111110, B00000000, 
-  B00000000, B01111111, B00001111, B11111110, B01111111, B11110000, B11111110, B00000000, 
-  B00000000, B01111111, B00000111, B11111100, B00111111, B11100000, B11111110, B00100000, 
-  B00000000, B00111111, B10000111, B11111000, B00011111, B11100001, B11111100, B00100000, 
-  B00000000, B00111111, B10000011, B11111000, B00011111, B11000001, B11111100, B00000000, 
-  B00000010, B00111111, B11000001, B11111100, B00111111, B10000011, B11111100, B00000000, 
-  B00000010, B00011111, B11000001, B11111110, B01111111, B10000011, B11111000, B00000000, 
-  B00000000, B00011111, B11100000, B11111110, B01111111, B00000111, B11111000, B00000000, 
-  B00000001, B00001111, B11110000, B01111111, B11111110, B00001111, B11110000, B00000000, 
-  B00000000, B00000111, B11110000, B00111111, B11111100, B00001111, B11100000, B00000000, 
-  B00000000, B00000111, B11111000, B00011111, B11111000, B00011111, B11100001, B00000000, 
-  B00000000, B00000011, B11111100, B00001111, B11110000, B00111111, B11000000, B00000000, 
-  B00000000, B00000001, B11111110, B00000111, B11100000, B01111111, B10000010, B00000000, 
-  B00000000, B00000000, B11111111, B00000001, B10000000, B11111111, B00000100, B00000000, 
-  B00000000, B00000000, B01111111, B10000000, B00000001, B11111110, B00000000, B00000000, 
-  B00000000, B00001000, B00011111, B11000000, B00000011, B11111000, B00000000, B00000000, 
-  B00000000, B00000100, B00001111, B11110000, B00001111, B11110000, B00000000, B00000000, 
-  B00000000, B00000010, B00000011, B11111000, B00011111, B11000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B01111110, B01111110, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000111, B11100000, B00000010, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000000, B00000000, B00001100, B00000000, B00000000, 
-  B00000000, B00000000, B00000110, B00000000, B00000000, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B11000000, B00000000, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000000, B01110000, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, 
-  B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, 
-  
-};
+#define led_pin 13      // pin leda (wskaźnika)
+bool led_state = true;  // wskaźnik otrzymanego pakietu
 
-void setup() {
+void setup()
+{
   SerialUSB.begin(115200);
-  delay(2000);
-  
-  pinMode(13, OUTPUT);
+  pinMode(led_pin, OUTPUT);
 
-if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64 ZMIANA NA 0x3D !!!!!!
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
+  {
     SerialUSB.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever            //PĘTLA FOREVER
-  }  
-  // start radio module  
-  radio.begin();
-  
-  compressor.clear();
-  compressor.format = "0_26_Latitude_49.0000000_54.5000000_2_7 26_53_Longitude_14.0699997_24.0900002_2_7 53_67_Altitude_0.0_1000.0_4_1 67_90_Pressure_600.0000_1200.0000_4_4 90_103_Temperature_-20.00_50.00_2_2 103_113_PM25_0.0_100.0_3_1 113_123_PM100_0.0_100.0_3_1 123_128_PackNo_0_32_2_0 X";
-
-//OLED
+    for(;;); // Don't proceed, loop forever
+  }
+   
   display.clearDisplay();
   display.display();
   display.clearDisplay();
   delay(50);
-  display.setTextSize(2);             // Normal 1:1 pixel scale
-  display.setTextColor(WHITE);        // Draw white text
-  display.setCursor(0, 0);            // Start at top-left corner
-  //  display.println("SobieskiSat");      //piszę od punktu 0,0
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
 
   
   DrawLogo();
   display.display();
   display.invertDisplay(true);
-    delay(250);
+  delay(250);
   display.invertDisplay(false);
-    delay(5000);  
+  delay(500);
+
+  radio.begin();
+  compressor.begin(compessorFormat);
 }
 
-void loop() {
-  // prepare empty space for received frame
-  // maximum length is maximum frame length + null termination
-  // 255 + 1 byte = 256 bytes
+void loop()
+{
+  // przyjmowanie pakietu
   char data[256];
-
-  // receive data and save it to string
   radio.receive(data);
+  reciNum++;
 
-  digitalWrite(13, led_state);
+  // sygnalizacja otrzymanego pakietu
+  digitalWrite(led_pin, led_state);
   led_state = !led_state;
 
-  compressor.clear();
-  // get and print signal level (rssi) 
-  //SERIAL PRINT
-  for (int i = 0; i < 16; i++)
-  {
-    compressor.data[i] = data[i];
-  }
+  compressor.set(data);
 
-  int rssi = radio.get_rssi_last();
-  SerialUSB.println(String(rssi) + "_" +
-                    String(compressor.retrieve("Latitude").value, compressor.retrieve("Latitude").decimals) + "_" + 
-                    String(compressor.retrieve("Longitude").value, compressor.retrieve("Longitude").decimals) + "_" +
-                    String(compressor.retrieve("Altitude").value, compressor.retrieve("Altitude").decimals) + "_" +
-                    String(compressor.retrieve("Pressure").value, compressor.retrieve("Pressure").decimals) + "_" +
-                    String(compressor.retrieve("Temperature").value, compressor.retrieve("Temperature").decimals) + "_" +
-                    String(compressor.retrieve("PM25").value, compressor.retrieve("PM25").decimals) + "_" +
-                    String(compressor.retrieve("PM100").value, compressor.retrieve("PM100").decimals));
-  
-  //SerialUSB.println(String(compressor.data));
-  //OLED PRINT  
+  UploadToSensors();
+  PrintSensors();
 
   display.clearDisplay();
-  
-  display.setTextSize(2);             // Normal 1:1 pixel scale
+  display.setTextSize(2);
   display.setCursor(0, 0);
+  
   display.print("RSSI: ");
   display.println(rssi);
   display.print("H: ");
   display.println(String(compressor.retrieve("Altitude").value));
-
   display.print("P: ");
   display.println(String(int(compressor.retrieve("PackNo").value))+ " " + String(package_num) + " " + String(package_num % 32));
-                        
-
   display.print("T: ");
   display.println(String(compressor.retrieve("Temperature").value));
   
   display.display();
   
   compressor.clear();
-  package_num++;
 }
 
 
-  void DrawLogo(void) {
+void DrawLogo(void) {
   display.clearDisplay();
 
   display.drawBitmap(
     (display.width()  - LOGO_WIDTH ) / 2,
     (display.height() - LOGO_HEIGHT) / 2,
     logo_bmp, LOGO_WIDTH, LOGO_HEIGHT, 1);
+  
   display.display();
   delay(250);
+}
+
+// wgrywa odbrane dane do fantomów sensorów
+void UploadToSensors()
+{
+  compressor.upload("SendNum", &sendNum);
+  rssi = radio.get_rssi_last();
+  compressor.upload("Latitude", &gps.Latitude);
+  compressor.upload("Longitude", &gps.Longitude);
+  compressor.upload("Altitude", &gps.Altitude);
+  compressor.upload("Pressure", &bmp.Pressure);
+  compressor.upload("Temperature", &bmp.Temperature);
+  compressor.upload("AirQuality", &mq9.AirQuality);
+  compressor.upload("PM10", &sps.PM1_0);
+  compressor.upload("PM25", &sps.PM2_5);
+  compressor.upload("PM40", &sps.PM4_0);
+  compressor.upload("PM100", &sps.PM10_0);
+  compressor.upload("Humidity", &dht.Humidity);
+  compressor.upload("Battery", &battery);
+}
+
+
+// wypisuje dane wszystkich sensorów
+void PrintSensors()
+{
+  SerialUSB.print(String(sendNum, 0) + "_");
+  SerialUSB.print(String(rssi, 0) + "_");
+  SerialUSB.print(String(gps.Latitude, PREC_LAT) + "_");
+  SerialUSB.print(String(gps.Longitude, PREC_LON) + "_");
+  SerialUSB.print(String(gps.Altitude, PREC_ALT) + "_");
+  SerialUSB.print(String(bmp.Pressure, PREC_PRE) + "_");
+  SerialUSB.print(String(bmp.Temperature, PREC_TEM) + "_");
+  SerialUSB.print(String(mq9.AirQuality, 0) + "_");
+  SerialUSB.print(String(sps.PM1_0, PREC_SPS) + "_");
+  SerialUSB.print(String(sps.PM2_5, PREC_SPS) + "_");
+  SerialUSB.print(String(sps.PM4_0, PREC_SPS) + "_");
+  SerialUSB.print(String(sps.PM10_0, PREC_SPS) + "_");
+  SerialUSB.print(String(dht.Humidity, PREC_HUM) + "_");
+  SerialUSB.print(String(battery, 0) + "_");
+  SerialUSB.println();
 }
