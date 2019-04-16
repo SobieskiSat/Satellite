@@ -77,13 +77,13 @@ void loop() {
 
   buzzer.update();
   
-  if (radio.empty() && !catchedEmpty)
+  if (radio.tx_fifo_empty() && !catchedEmpty)
   {
       lastEmpty = millis();
       catchedEmpty = true;
   }
   
-  if (radio.empty() && millis() - lastEmpty > 30 && catchedEmpty)
+  if (radio.tx_fifo_empty() && millis() - lastEmpty > 30 && catchedEmpty)
   { 
       SerialUSB.println("Radio sending");
 
