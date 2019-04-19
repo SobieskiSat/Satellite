@@ -5,6 +5,11 @@
 
 using namespace SobieskiSat;
 
+void Compressor::begin(String _formats)
+{
+	Transmitter = true;
+}
+
 void Compressor::clear()
 {
 	for (int i = 0; i < packetSize; i++)
@@ -12,10 +17,26 @@ void Compressor::clear()
 		data[i] = 0b00000000;
 	}
 	index = 0;
-	if (format != "") generateFormat = false;
+	//if (format != "") generateFormat = false;
 }
 
-void Compressor::attach(DataPacket packet)
+void Compressor::begin()
+{
+	Transmitter = false;
+}
+
+void Compressor::push(int lenght, char *_data)
+{
+	if (Transmitter && format == "empty") generateFormat(lenght); // dodać to
+	// dodać opcję wgrywania danych do kompresora!
+}
+
+void Compressor::generateFormat(int lenght)
+{
+	return;
+}
+
+void Compressor::attach(DataPacket packet) // zmienić
 {
 	unsigned int cropped = (unsigned int)((packet.value - packet.bottomLimit) * pow(10, packet.decimals));
 	unsigned int spread = (unsigned int)((packet.upperLimit - packet.bottomLimit) * pow(10, packet.decimals));
@@ -27,9 +48,11 @@ void Compressor::attach(DataPacket packet)
 		bitWrite(data[index / 8], index % 8, bitRead(cropped, index - startIndex));
 		index++;
 	}
+	/*
 	if (generateFormat) format += String(startIndex) + "_" + String(index) + "_" + packet.name + "_" +
 								  String(packet.bottomLimit, packet.decimals) + "_" + String(packet.upperLimit, packet.decimals) + "_" +
 								  String(packet.numbers) + "_" + String(packet.decimals) + " ";
+	*/
 }
 
 DataPacket Compressor::retrieve(String name)
@@ -104,4 +127,9 @@ DataPacket Compressor::find(String name, int& startBit, int& endBit)
 	startBit = current[0].toInt();
 	endBit = current[1].toInt();
 	return DataPacket(current[2], current[3].toFloat(), current[4].toFloat(), current[5].toInt(), current[6].toInt(), -1);
+}
+
+void Compressor::download(String name, float& variable)
+{
+	variable = retrieve(name).value;
 }

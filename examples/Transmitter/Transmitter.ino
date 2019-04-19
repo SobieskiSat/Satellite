@@ -12,6 +12,7 @@ GPS gps;
 BMP280 bmp;
 SPS30 sps;
 DHT22 dht;
+MQ9 mq;
 
 long lastSave;
 long lastEmpty;

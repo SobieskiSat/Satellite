@@ -7,27 +7,25 @@
 
 using namespace SobieskiSat;
 
-MQ9::MQ9() { ID = 'M'; }
+BAT::BAT() { ID = 'b'; }
 		
-bool MQ9::begin()
+bool BAT::begin()
 {
 	Status = STA_DURINGINIT;
-	fileName = "MQ9.txt";
+	fileName = "BAT.txt";
 	minDelay = 0;
-	setUpdateDelay(UPD_MQ9);
-	pinMode(PIN_MQ9, INPUT);
+	setUpdateDelay(UPD_BAT);
+	pinMode(PIN_BAT, INPUT);
 	
-	// dodać procedurę testu czujnika
 	Status = STA_INITIALIZED;
-	
 	return (Status == STA_INITIALIZED);
 }
 		
-bool MQ9::update()
+bool BAT::update()
 {
 	if (timeForUpdate())
 	{
-		AirQuality = analogRead(PIN_MQ9);
+		Reading = analogRead(PIN_BAT);
 		
 		lastUpdate = millis();
 		return true;
@@ -35,7 +33,14 @@ bool MQ9::update()
 	else return false;
 }
 		
-String MQ9::listReadings()
+String BAT::listReadings()
 {
-	return "AirQuality: " + String(AirQuality, 0);
+	return "BatteryLevel: " + String(getLevel(), 0);
 }
+
+float BAT::getLevel()
+{
+	return Reading;
+}
+
+

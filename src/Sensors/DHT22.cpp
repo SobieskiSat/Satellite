@@ -1,43 +1,31 @@
 #include "Sensors.h"
 #include "Arduino.h"
-#include "../src/SobieskiSat.h"
 #include "../src/Components/Logger.h"
-
-#define DHT22_pin 3
+#include "../src/config.h"
 
 //extern Logger logger;
 
 using namespace SobieskiSat;
 
-DHT22::DHT22() : DHT22(DHT22_pin) { }
-
-DHT22::DHT22(int pin_)
-{
-	pin = pin_;
-	ID = 'D';
-}
+DHT22::DHT22() { ID = 'D'; }
 
 bool DHT22::begin()
 {
-	minDelay = 2000;
+	Status = STA_DURINGINIT;
 	fileName = "DHT22.txt";
-	updateDelay = minDelay;
-	lastUpdate = 0;
+	minDelay = 2000;
+	lastUpdate = millis() + DEL_DHT;
+	setUpdateDelay(UPD_DHT);
 	
-	Initialized = true;
-	delay(minDelay);
-	Initialized = update();
+	// procedura testu i kalibracji
+	Status = STA_INITIALIZED;
 	
-	lastUpdate =  millis() + 3000;
-	
-	//logger.addToBuffer("[" + String(ID) + "] I " + (Initialized == true ? "1" : "0") + " @" + millis() + "\r\n");
-	
-	return Initialized;
+	return (Status == STA_INITIALIZED);
 }
 
 bool DHT22::update()
 {
-	if (millis() - lastUpdate > updateDelay && Initialized)
+	if (timeForUpdate())
 	{
 		byte data[40] = {0};
 		if (sample(data) != SimpleDHTErrSuccess) return false;
@@ -49,13 +37,10 @@ bool DHT22::update()
 		Temperature = (float)((temperature & 0x8000 ? -1 : 1) * (temperature & 0x7FFF)) / 10.0;
 		Humidity = (float)humidity / 10.0;
 
-		SDbuffer += String(Humidity, 1) + " " + String(Temperature, 1) + " @" + String(millis());
+		SDbuffer += String(Humidity, PREC_HUM) + " " + String(Temperature, PREC_TEM) + " @" + String(millis());
 		SDbuffer += "\r\n";
 		
 		lastUpdate = millis();
-		
-		//logger.addToBuffer(listReadings(), true);
-		
 		return true;
 	}
 	
@@ -64,7 +49,7 @@ bool DHT22::update()
 
 String DHT22::listReadings()
 {
-	return "Humidity: " + String(Humidity, 1) + " Temperature: " + String(Temperature, 1);
+	return "Humidity: " + String(Humidity, PREC_HUM) + " Temperature: " + String(Temperature, PREC_TEM);
 }
 
 long DHT22::levelTime(byte level, int firstWait, int interval)
@@ -97,7 +82,7 @@ long DHT22::levelTime(byte level, int firstWait, int interval)
         //     https://arduino.stackexchange.com/questions/33572/arduino-countdown-without-using-delay
         time = micros() - time_start;
 
-        loop = (digitalRead(pin) == level);
+        loop = (digitalRead(PIN_DHT) == level);
 	}
 
     return time;
@@ -140,14 +125,14 @@ int DHT22::sample(byte data[40]) {
     //    1. T(be), PULL LOW 1ms(0.8-20ms).
     //    2. T(go), PULL HIGH 30us(20-200us), use 40us.
     //    3. SET TO INPUT.
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, LOW);
+    pinMode(PIN_DHT, OUTPUT);
+    digitalWrite(PIN_DHT, LOW);
     delayMicroseconds(1000);
     // Pull high and set to input, before wait 40us.
     // @see https://github.com/winlinvip/SimpleDHT/issues/4
     // @see https://github.com/winlinvip/SimpleDHT/pull/5
-    digitalWrite(pin, HIGH);
-    pinMode(pin, INPUT);
+    digitalWrite(PIN_DHT, HIGH);
+    pinMode(PIN_DHT, INPUT);
     delayMicroseconds(40);
 
     // DHT11 starting:

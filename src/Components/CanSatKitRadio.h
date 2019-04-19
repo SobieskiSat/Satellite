@@ -160,7 +160,7 @@ class Radio {
    * @brief Get character string from receive buffer
    * @param data pointer to fill with data
    */
-  static void receive(char* data);
+  static void receive(char* data, int& length);
 
   /**
    * @brief Get binary data from receive buffer

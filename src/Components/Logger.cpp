@@ -5,13 +5,14 @@
 #include "Logger.h"
 #include <SPI.h>
 #include <SD.h>
+#include "../src/SobieskiSat.h"
 
 using namespace SobieskiSat;
 
 bool Logger::begin()
 {
-	Initialized = false;
-	if (SD.begin(SD_pin))
+	Status = STA_DURINGINIT;
+	if (SD.begin(PIN_SD))
 	{
 		File sessions = SD.open("SESSIONS.TXT");
 		if (!sessions)
@@ -23,7 +24,8 @@ bool Logger::begin()
 				sessions.close();
 				SD.mkdir("0");
 				rootDir = "0/";
-				Initialized = true;
+				
+				Status = STA_INITIALIZED;
 				return true;
 			}
 			else return false;
@@ -39,7 +41,8 @@ bool Logger::begin()
 			sessions.close();
 			SD.mkdir(String(sessionNo));
 			rootDir = String(sessionNo) + "/";
-			Initialized = true;
+			
+			Status = STA_INITIALIZED;
 			return true;
 		}
 		
@@ -50,7 +53,7 @@ bool Logger::begin()
 
 bool Logger::save(Sensor& sensor)
 {
-	if (Initialized)
+	if (Status == STA_INITIALIZED)
 	{
 	if (sensor.SDbuffer != "")
 	{
@@ -83,7 +86,7 @@ void Logger::addToBuffer(String str, bool onlyUSB)
 	}
 	else
 	{
-		if (Initialized) buffer += str;
+		if (Status == STA_INITIALIZED) buffer += str;
 		if (printUSB) SerialUSB.println(str);
 	}
 }

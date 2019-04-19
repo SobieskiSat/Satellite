@@ -12,7 +12,7 @@ namespace SobieskiSat
 	{
 		public:
 		
-		bool Initialized = false;
+		int Status;
 		bool printUSB = true;
 		
 		bool begin();
@@ -26,8 +26,6 @@ namespace SobieskiSat
 		String rootDir;
 		String buffer;
 	};
-	
-	#define SD_pin 11
 };
 
 #endif

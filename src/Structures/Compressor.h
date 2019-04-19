@@ -12,23 +12,24 @@ namespace SobieskiSat
 		public:
 		
 		void begin();
+		void begin(String _formats);
 		void clear();
 		void attach(DataPacket packet);
-		void set(char *_data);
-		
+		void push(int length, char *_data);
+		void download(String name, float& variable);
 		DataPacket retrieve(String name);
 		
-		int packetSize = 16;
-		char data[16];
-		bool generateFormat = false;
-		String format = "";
-		// index of last bit in data
-		int index = 0;
+		String format = "empty";
+		bool Transmitter;
 		
 		private:
 		
-		DataPacket find(String name, int &startBit, int &endBit);
+		int packetSize = 16;
+		char data[16];
+		int index = 0; // index of last bit in data
 		
+		DataPacket find(String name, int &startBit, int &endBit);
+		void generateFormat(int length);
 		
 	};
 }

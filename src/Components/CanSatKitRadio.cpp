@@ -531,9 +531,10 @@ std::uint8_t Radio::available() {
   return frames_in_rx_fifo;
 }
 
-void Radio::receive(char* data) {
+void Radio::receive(char* data, int& length) {
   uint8_t dummy;
   receive((uint8_t*)data, dummy);
+  length = (int)dummy;
 }
 
 void Radio::receive(uint8_t* data, uint8_t& length) {

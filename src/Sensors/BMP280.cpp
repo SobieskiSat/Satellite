@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "Arduino.h"
-#include "../src/SobieskiSat.h"
+#include "../src/config.h"
 
 using namespace SobieskiSat;
 
@@ -12,11 +12,11 @@ BMP280::BMP280() { ID = 'B'; }
 
 bool BMP280::begin()
 {
-	Initialized = false;
-	Wire.begin();
+	Status = STA_DURINGINIT;
 	fileName = "BMP280.txt";
 	oversampling = 4;
 	
+	Wire.begin();
 	if (readUInt(0x88, dig_T1) &&
 		readInt(0x8A, dig_T2)  &&
 		readInt(0x8C, dig_T3)  &&
@@ -31,18 +31,17 @@ bool BMP280::begin()
 		readInt(0x9E, dig_P9))
 	{
 		startMeasurment();
-		updateDelay = minDelay;
-		packetSize = 10;
+		setUpdateDelay(UPD_BMP);
 		
-		Initialized = true;
+		Status = STA_INITIALIZED; // dodać procedurę testu i kalibracji
 	}
 	
-	return Initialized;
+	return (Status == STA_INITIALIZED);
 }
 
 bool BMP280::update()
 {
-	if (millis() - lastUpdate > updateDelay && Initialized)
+	if (timeForUpdate())
 	{
 		startMeasurment();
 		double uP, uT;
@@ -75,7 +74,7 @@ bool BMP280::update()
 			Pressure = (float)dPressure;
 			Altitude = 44330 * (1.0 - pow(Pressure / 1013.25, 0.1903));
 			
-			SDbuffer += String(Pressure, 7) + " " + String(Temperature, 7) + " @" + String(millis());
+			SDbuffer += String(Pressure, PREC_PRE) + " " + String(Temperature, PREC_TEM) + " @" + String(millis());
 			SDbuffer += "\r\n";
 				
 			lastUpdate = millis();

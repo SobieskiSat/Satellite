@@ -7,15 +7,15 @@
 
 using namespace SobieskiSat;
 
-MQ9::MQ9() { ID = 'M'; }
+PHR::PHR() { ID = 'M'; }
 		
-bool MQ9::begin()
+bool PHR::begin()
 {
 	Status = STA_DURINGINIT;
-	fileName = "MQ9.txt";
+	fileName = "PHR.txt";
 	minDelay = 0;
-	setUpdateDelay(UPD_MQ9);
-	pinMode(PIN_MQ9, INPUT);
+	setUpdateDelay(UPD_PHR);
+	pinMode(PIN_PHR, INPUT);
 	
 	// dodać procedurę testu czujnika
 	Status = STA_INITIALIZED;
@@ -23,11 +23,11 @@ bool MQ9::begin()
 	return (Status == STA_INITIALIZED);
 }
 		
-bool MQ9::update()
+bool PHR::update()
 {
 	if (timeForUpdate())
 	{
-		AirQuality = analogRead(PIN_MQ9);
+		Light = analogRead(PIN_PHR);
 		
 		lastUpdate = millis();
 		return true;
@@ -35,7 +35,7 @@ bool MQ9::update()
 	else return false;
 }
 		
-String MQ9::listReadings()
+String PHR::listReadings()
 {
-	return "AirQuality: " + String(AirQuality, 0);
+	return "LightIntensity: " + String(Light, 0);
 }

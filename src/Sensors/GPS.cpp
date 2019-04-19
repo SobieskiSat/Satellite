@@ -4,7 +4,7 @@
 #include <HardwareSerial.h>
 #include "../src/Structures/Clock.h"
 #include "../src/Structures/Time.h"
-#include "../src/SobieskiSat.h"
+#include "../src/config.h"
 
 using namespace SobieskiSat;
 
@@ -12,6 +12,11 @@ GPS::GPS() : gps(&Serial1) { ID = 'G'; }
 
 bool GPS::begin()
 {
+	Status = STA_DURINGINIT;
+	fileName = "GPS.txt";
+	minDelay = 0;
+	setUpdateDelay(UPD_GPS);
+	
 	gps.begin(9600);
 	gps.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
 	gps.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);  
@@ -19,17 +24,15 @@ bool GPS::begin()
 
 	delay(1000);
 	
-	Serial1.println(PMTK_Q_RELEASE); 
+	Serial1.println(PMTK_Q_RELEASE);
 	
-	minDelay = 0;
-	updateDelay = 0;
-	packetSize = 5;
-	fileName = "GPS.txt";
+	// dodać procedurę testu i kalibracji
+	
+	return true;
 }
 
 bool GPS::update()
 {
-	
 	char c = gps.read();
 	if (gps.newNMEAreceived())
 	{
@@ -44,28 +47,28 @@ bool GPS::update()
 			HardwareClock.update();
 			updateRecievedDate();
 			
-				SDbuffer += String(Latitude, 7) + " " + String(Longitude, 7) + " " + String(Altitude, 7) + " " + RecievedDate.getString() + " @" + String(millis());
-				SDbuffer += "\r\n";
-			
-			
-			//logger.addToBuffer(listReadings(), true);
-			
+			SDbuffer += LastNMEA;
+			SDbuffer += "\r\n";
+			SDbuffer += String(Latitude, PREC_LAT) + " " + String(Longitude, PREC_LON) + " " + String(Altitude, PREC_ALT) + " " + RecievedDate.getString() + " @" + String(millis());
+			SDbuffer += "\r\n";
+						
 			return true;
 		}
 	}
 	
-	if (!Initialized && gps.fix /*&& gpsAnyZero()*/)
+	if ((Status == STA_DURINGINIT) && gps.fix)
 	{
 		HardwareClock.begin(RecievedDate);
 		updateRecievedDate();
-		
-		Initialized = true;
 		
 		Latitude = gps.latitudeDegrees;
 		Longitude = gps.longitudeDegrees;
 		Altitude = gps.altitude;
 		LastNMEA = gps.lastNMEA();
-		//logger.addToBuffer("[" + String(ID) + "] I " + (Initialized == true ? "1" : "0") + " @" + millis() + "\r\n");
+		
+		// procedura testu i kalibracji - gpsAnyZero
+		Status = STA_INITIALIZED;
+		
 		return true;
 	}
 	return false;
@@ -73,7 +76,7 @@ bool GPS::update()
 
 String GPS::listReadings()
 {
-	return "Latitude: " + String(Latitude, 7) + " Longitude: " + String(Longitude, 7) + " Altitude: " + String(Altitude, 2);
+	return "Latitude: " + String(Latitude, PREC_LAT) + " Longitude: " + String(Longitude, PREC_LON) + " Altitude: " + String(Altitude, PREC_ALT);
 }
 
 bool GPS::gpsAnyZero()
