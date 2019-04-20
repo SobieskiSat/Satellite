@@ -19,6 +19,7 @@ namespace SobieskiSat
 		void download(String name, float& variable);
 		DataPacket retrieve(String name);
 		String generateFormat(String particularNameChain);
+		String getData();
 		
 		bool Transmitter;
 		

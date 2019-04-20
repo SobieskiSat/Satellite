@@ -65,6 +65,17 @@ void Compressor::attach(String name, float value) // zmienić
 	}
 }
 
+String Compressor::getData()
+{
+	String toReturn = "";
+	int bytesCount = Element(currentFormat, '~', 0).toInt();
+	for (int i = 0; i < bytesCount; i++)
+	{
+		toReturn += data[i];
+	}
+	return toReturn;
+}
+
 // ################# DECOMPRESSION ####################
 
 void Compressor::begin(String formats_)
