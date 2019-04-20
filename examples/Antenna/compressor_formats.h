@@ -3,6 +3,6 @@
 
 #include <Arduino.h>
 
-static String compressorFormat = "";
+static String compressorFormats = "";
 
 #endif

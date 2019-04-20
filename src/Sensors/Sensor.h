@@ -2,7 +2,6 @@
 #define SOBIESKISATLIBRARY_SENSOR_H
 
 #include "Arduino.h"
-#include "../src/config.h"
 
 namespace SobieskiSat
 {
@@ -10,17 +9,18 @@ namespace SobieskiSat
 	{
 		public:
 		
-		int Status = 0;
+		int Status;
 		String SDbuffer;
 		String fileName;
 		char ID;
+		bool newReading;
 		
+		Sensor();
 		bool begin();
 		bool update();
 		bool setUpdateDelay(int ms);
 		void SDbufferClear();
 		String listReadings();
-		//static bool (*sendLog)(String message, Sensor& sender);
 		
 		protected:
 		
@@ -28,6 +28,7 @@ namespace SobieskiSat
 		int updateDelay;
 		int minDelay;
 		bool timeForUpdate();
+		void successUpdateFinish();
 	};
 };
 

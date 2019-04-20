@@ -5,7 +5,7 @@
 
 using namespace SobieskiSat;
 
-MPU::MPU() { ID = 'M'; }
+MPU::MPU() : Sensor() { ID = 'M'; }
 
 bool MPU::begin()
 {
@@ -54,8 +54,7 @@ bool MPU::update()
 			SDbuffer += String(Quat[0], PREC_MPU) + " " + String(Quat[1], PREC_MPU) + " " + String(Quat[2], PREC_MPU) + " " + String(Quat[3], PREC_MPU) + " @" + String(millis());
 			SDbuffer += "\r\n";
 			
-
-			lastUpdate = millis();
+			successUpdateFinish();
 			return true;
 		}
 	}

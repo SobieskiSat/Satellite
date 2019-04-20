@@ -2,134 +2,159 @@
 #include "Arduino.h"
 #include <math.h>
 #include "../src/Sensors/Sensor.h"
+#include "../src/utilities.h"
 
 using namespace SobieskiSat;
 
-void Compressor::begin(String _formats)
-{
-	Transmitter = true;
-}
-
 void Compressor::clear()
 {
-	for (int i = 0; i < packetSize; i++)
+	for (int i = 0; i < 256; i++)
 	{
 		data[i] = 0b00000000;
 	}
-	index = 0;
-	//if (format != "") generateFormat = false;
+	currentBit = 0;
+	currentFormat = "empty";
+	receivedLenght = 0;
 }
+
+// ####################### COMPRESSION #########################
 
 void Compressor::begin()
 {
 	Transmitter = false;
 }
 
-void Compressor::push(int lenght, char *_data)
+// Zwraca format na podstawie zmiennych podanych w 'nameChain'
+String Compressor::generateFormat(String particularNameChain)
 {
-	if (Transmitter && format == "empty") generateFormat(lenght); // dodać to
-	// dodać opcję wgrywania danych do kompresora!
-}
-
-void Compressor::generateFormat(int lenght)
-{
-	return;
-}
-
-void Compressor::attach(DataPacket packet) // zmienić
-{
-	unsigned int cropped = (unsigned int)((packet.value - packet.bottomLimit) * pow(10, packet.decimals));
-	unsigned int spread = (unsigned int)((packet.upperLimit - packet.bottomLimit) * pow(10, packet.decimals));
-	int packetBits = 0;
-	while (spread > pow(2, packetBits)) { packetBits++; }
-	int startIndex = index;
-	while (index < startIndex + packetBits)
+	// nameChain: PackNo Laitude Longitude Altitude...
+	// return: ID formatu (lenght)~START_STOP_NAME_MAX_MIN_PREC .. START_STOP_NAME_MAX_MIN_PREC ;
+	int namesCount = ElementCount(particularNameChain, ' ');
+	int lenght = 0;
+	for (int i = 0; i < namesCount; i++)
 	{
-		bitWrite(data[index / 8], index % 8, bitRead(cropped, index - startIndex));
-		index++;
+		lenght += FindDataPacket(Element(particularNameChain, ' ', i)).getBitCount();
 	}
-	/*
-	if (generateFormat) format += String(startIndex) + "_" + String(index) + "_" + packet.name + "_" +
-								  String(packet.bottomLimit, packet.decimals) + "_" + String(packet.upperLimit, packet.decimals) + "_" +
-								  String(packet.numbers) + "_" + String(packet.decimals) + " ";
-	*/
+	
+	String toReturn = "";
+	int bitIndex = 0;
+	
+	toReturn += String(lenght, 0) + "~";
+	for (int i = 1; i < namesCount; i++)
+	{
+		String name = Element(particularNameChain, ' ', i);
+		DataPacket prototype = FindDataPacket(name);
+		toReturn += String(bitIndex, 0) + "_" + String(bitIndex + prototype.getBitCount(), 0) + "_";
+		toReturn += prototype.toString();
+		bitIndex += prototype.getBitCount();
+	}
+	
+	return toReturn;
+}
+
+void Compressor::attach(String name, float value) // zmienić
+{
+	DataPacket prototype = FindDataPacket(name);
+	unsigned int absolute = (unsigned int)((value - prototype.bottomLimit) * pow(10, prototype.decimals) + 0.5f); // 0.5f czy jest tak na pewno?/???????????
+	int openingBit = currentBit;
+	
+	while (currentBit < openingBit + prototype.getBitCount())
+	{
+		bitWrite(data[currentBit / 8], currentBit % 8, bitRead(absolute, currentBit - openingBit));
+		currentBit++;
+	}
+}
+
+// ################# DECOMPRESSION ####################
+
+void Compressor::begin(String formats_)
+{
+	Transmitter = true;
+	formats = formats_;
+}
+
+void Compressor::push(int lenght, char *data_)
+{
+	for (int i = 0; i < BitsToBytes(lenght); i++)
+	{
+		data[i] = data_[i];
+	}
+	receivedLenght = lenght;
+	matchFormat();
 }
 
 DataPacket Compressor::retrieve(String name)
 {
-	if (format != "")
+	int openingBit;
+	int closingBit;
+	DataPacket found = getDataPacketLocation(name, openingBit, closingBit);
+	
+	int closingByte = BitsToBytes(closingBit);
+	bool finished = false;
+	bool makeOffset = true;
+	
+	unsigned int absolute = 0;
+	for (int B = BitsToBytes(openingBit); B <= closingByte && !finished; B++)
 	{
-		int startBit;
-		int endBit;
-		DataPacket found = find(name, startBit, endBit);
-		unsigned int unbitten = 0;
-		int endByte = endBit / 8;
-		bool finished = false;
-		bool started = true;
-		if (endByte % 8 != 0) endByte += 8 - (endByte % 8);
-		for (int B = startBit / 8; B <= endByte && !finished; B++)
+		for (int b = 0; b < 8 && !finished; b++)
 		{
-			for (int b = 0; b < 8 && !finished; b++)
+			if (makeOffset)
 			{
-				if (started)
-				{
-					b += startBit % 8;
-					started = false;
-				}
-				if ((B * 8 + b) == endBit)
-				{
-					finished = true;
-					break;
-				}
-				bitWrite(unbitten, (b + B * 8) - startBit, bitRead(data[B], b));
+				b += openingBit % 8; // nie zawsze zaczyna się na początku bajtu
+				makeOffset = false;		// wskazuje że zakończyło przesuwanie wskaźnika
 			}
+			if ((B * 8 + b) == closingBit)
+			{
+				finished = true;
+				break;
+			}
+			bitWrite(absolute, (b + B * 8) - openingBit, bitRead(data[B], b));
 		}
-		found.value = (unbitten / pow(10, found.decimals)) + found.bottomLimit;
-		return found;
 	}
-	else
-	{
-		SerialUSB.println("Unable to decode! Format do not exist");
-	}
+	
+	found.value = (absolute / pow(10, found.decimals)) + found.bottomLimit;
+	return found;
 }
 
-DataPacket Compressor::find(String name, int& startBit, int& endBit)
+DataPacket Compressor::getDataPacketLocation(String name, int& openingBit, int& closingBit)
 {
-	int ind = 0;
-	String current[7];
-	int varNum = 0;
-	while (format[ind] != 'X')
+	// definition: START_STOP_NAME_MAX_MIN_PREC
+	
+	int elementCount = ElementCount(currentFormat, ' ');
+	for (int i = 0; i < elementCount; i++)
 	{
-		varNum = 0;
-		while (format[ind] != ' ')
+		String definitionCandidate = Element(currentFormat, ' ', i);
+		String elementName = Element(definitionCandidate, '_', 2);
+		if (elementName == name)
 		{
-			if (format[ind] == '_') varNum++;
-			else current[varNum] += format[ind];
-			ind++;
-		}
-		// found this name
-		if (current[2] == name) break;
-		
-		if (format[ind] == ' ')
-		{
-			ind++;
-			for (int i = 0; i < 7; i++)
-			{
-				current[i] = "";
-			}
+			openingBit = 	  Element(definitionCandidate, '_', 0).toInt();
+			closingBit = 	  Element(definitionCandidate, '_', 1).toInt();
+			return DataPacket(Element(definitionCandidate, '_', 2),
+							  Element(definitionCandidate, '_', 3).toFloat(),
+							  Element(definitionCandidate, '_', 4).toFloat(),
+							  Element(definitionCandidate, '_', 5).toInt()); // bardzo niewydajne!!!!!!!!!!!!!!!
 		}
 	}
-	if (format[ind] == 'X')
-	{
-		SerialUSB.println("unable to find: " + name);
-		return DataPacket("", 0, 0, 0, 0, 0);
-	}
-	startBit = current[0].toInt();
-	endBit = current[1].toInt();
-	return DataPacket(current[2], current[3].toFloat(), current[4].toFloat(), current[5].toInt(), current[6].toInt(), -1);
+	
+	LogMessage("[Error] In file: //src//Structures//Compressor.cpp - getDataPacketLocation, DataPacket could not be found inside format. Input: {" + name + "}");
+	return DataPacket("InvalidName", 0, 0, 0);
 }
 
 void Compressor::download(String name, float& variable)
 {
 	variable = retrieve(name).value;
+}
+
+void Compressor::matchFormat()
+{
+	int formatCount = ElementCount(formats, '|'); // do zmiany char -> String jako separator
+	for (int i = 0; i < formatCount; i++)
+	{
+		String formatCandidate = Element(formats, '|', i);
+		int candidateLenght = Element(formatCandidate, '~', 0).toInt();
+		if (receivedLenght == candidateLenght) currentFormat = Element(formatCandidate, '~', 1);
+	}
+	
+	LogMessage("[Error] In file: //src//Structures//Compressor.cpp - matchFormat, No format could be matched to received lenght.");
+	currentFormat = "empty";
 }

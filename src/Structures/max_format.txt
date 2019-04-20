@@ -1,0 +1,7 @@
+﻿NrPakietu_RSSI_Latitude_Longitude_Altitude_Ciśnienie_Temperatura_PoziomBaterii_MQ9_Pyły1.0_Pyły2.5_Pyły4.0_Pyły10.0_Wilgotność
+
+SendNum Latitude Longitude Altitude Pressure Temperature AirQuality PM10 PM25 PM40 PM100 Humidity Battery
+SendNum Latitude Longitude Altitude Pressure Temperature AirQuality PM10 PM25 PM40 PM100 Humidity
+SendNum Latitude Longitude Altitude Pressure Temperature AirQuality PM10 PM25 PM40 PM100
+SendNum Latitude Longitude Altitude Pressure Temperature AirQuality
+SendNum Latitude Longitude Altitude Pressure Temperature

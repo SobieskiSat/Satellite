@@ -5,13 +5,17 @@
 #include "Logger.h"
 #include <SPI.h>
 #include <SD.h>
-#include "../src/SobieskiSat.h"
+#include "../src/config.h"
 
 using namespace SobieskiSat;
+
+String temp_buffer = "";
 
 bool Logger::begin()
 {
 	Status = STA_DURINGINIT;
+	LogMessage = logMessage;
+	
 	if (SD.begin(PIN_SD))
 	{
 		File sessions = SD.open("SESSIONS.TXT");
@@ -71,28 +75,16 @@ bool Logger::save(Sensor& sensor)
 	return false;
 }
 
-bool Logger::logSensor(String message, Sensor& sender)
+void Logger::logMessage(const String msg)
 {
-	buffer += "[" + String(sender.ID) + "] " + message + "\r\n";
-	SerialUSB.println("[" + String(sender.ID) + "] " + message);
-}
-
-void Logger::addToBuffer(String str, bool onlyUSB)
-{
-	if (onlyUSB)
-	{
-		if (printUSB) SerialUSB.println(str);
-		return;
-	}
-	else
-	{
-		if (Status == STA_INITIALIZED) buffer += str;
-		if (printUSB) SerialUSB.println(str);
-	}
+	if (LOG_SD == 1) SerialUSB.println(msg);
+	if (LOG_SERIAL == 1) temp_buffer += msg + "\r\n";
 }
 
 bool Logger::saveBuffer()
 {
+	buffer += temp_buffer;
+	temp_buffer = "";
 	if (buffer != "")
 	{
 		File file = SD.open(rootDir + "LOG.TXT", FILE_WRITE);

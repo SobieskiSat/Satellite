@@ -7,7 +7,7 @@
 
 using namespace SobieskiSat;
 
-DHT22::DHT22() { ID = 'D'; }
+DHT22::DHT22() : Sensor() { ID = 'D'; }
 
 bool DHT22::begin()
 {
@@ -40,7 +40,7 @@ bool DHT22::update()
 		SDbuffer += String(Humidity, PREC_HUM) + " " + String(Temperature, PREC_TEM) + " @" + String(millis());
 		SDbuffer += "\r\n";
 		
-		lastUpdate = millis();
+		successUpdateFinish();
 		return true;
 	}
 	

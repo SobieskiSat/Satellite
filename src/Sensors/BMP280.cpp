@@ -5,10 +5,11 @@
 #include <math.h>
 #include "Arduino.h"
 #include "../src/config.h"
+#include "../src/utilities.h"
 
 using namespace SobieskiSat;
 
-BMP280::BMP280() { ID = 'B'; }
+BMP280::BMP280() : Sensor() { ID = 'B'; }
 
 bool BMP280::begin()
 {
@@ -34,6 +35,7 @@ bool BMP280::begin()
 		setUpdateDelay(UPD_BMP);
 		
 		Status = STA_INITIALIZED; // dodać procedurę testu i kalibracji
+		LogMessage("Success");
 	}
 	
 	return (Status == STA_INITIALIZED);
@@ -77,7 +79,7 @@ bool BMP280::update()
 			SDbuffer += String(Pressure, PREC_PRE) + " " + String(Temperature, PREC_TEM) + " @" + String(millis());
 			SDbuffer += "\r\n";
 				
-			lastUpdate = millis();
+			successUpdateFinish();
 			return true;
 		}
 	}

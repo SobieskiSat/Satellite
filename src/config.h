@@ -9,6 +9,11 @@
 #define PIN_DHT 3
 #define PIN_SD 11
 
+// konfiguracja powiadomień
+#define LOG_SD 1
+#define LOG_SERIAL 1
+#define WAIT_SERIAL 1
+
 // precyzja zmiennych podczas wysyłania (kompresji) i pisania na USB
 #define PREC_LAT 7
 #define PREC_LON 7
@@ -20,25 +25,27 @@
 #define PREC_MPU 7
 
 // minimalne przewidywane odczyty (sensory wysyłane przez radio)
-#define MIN_LAT 49f
-#define MIN_LON 14.07f
-#define MIN_ALT 0f
-#define MIN_PRE 600f
-#define MIN_TEM -10f
+#define MIN_SNU 0
+#define MIN_LAT 49.0
+#define MIN_LON 14.07
+#define MIN_ALT 0.0
+#define MIN_PRE 600.0
+#define MIN_TEM -10.0
 #define MIN_AIR 0
-#define MIN_SPS 0f
-#define MIN_HUM 0f
+#define MIN_SPS 0.0
+#define MIN_HUM 0.0
 #define MIN_BAT 0
 	
 // maksymalne przewidywane odczyty (sensory wysyłane przez radio)
-#define MAX_LAT 52f
-#define MAX_LON 24.09f
-#define MAX_ALT 5000f
-#define MAX_PRE 1100f
-#define MAX_TEM 50f
+#define MAX_SNU 128 
+#define MAX_LAT 52.0
+#define MAX_LON 24.09
+#define MAX_ALT 6553.0
+#define MAX_PRE 1100.0
+#define MAX_TEM 50.0
 #define MAX_AIR 4096
-#define MAX_SPS 102.4f
-#define MAX_HUM 100f
+#define MAX_SPS 102.4
+#define MAX_HUM 100.0
 #define MAX_BAT 4096
 	
 // czas między pomiarami, 0 oznacza najmniejszy możliwy
@@ -62,7 +69,7 @@
 #define STA_ERROR 4
 #define STA_DISABLED 5
 #define STA_PHANTOM 6
-	
+
 /*
 enum class SensorStatus
 {

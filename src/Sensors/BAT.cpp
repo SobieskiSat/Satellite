@@ -7,7 +7,7 @@
 
 using namespace SobieskiSat;
 
-BAT::BAT() { ID = 'b'; }
+BAT::BAT() : Sensor() { ID = 'b'; }
 		
 bool BAT::begin()
 {
@@ -27,7 +27,7 @@ bool BAT::update()
 	{
 		Reading = analogRead(PIN_BAT);
 		
-		lastUpdate = millis();
+		successUpdateFinish();
 		return true;
 	}
 	else return false;

@@ -53,7 +53,7 @@ void setup()
   delay(500);
 
   radio.begin();
-  compressor.begin(compressorFormat);
+  compressor.begin(compressorFormats);
 }
 
 void loop()

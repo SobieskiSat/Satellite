@@ -4,12 +4,20 @@
 
 using namespace SobieskiSat;
 
+Sensor::Sensor()
+{
+	Status = STA_PREINIT;
+	SDbuffer = "";
+	fileName = "unknown.txt";
+	ID = 'n';
+	newReading = false;
+}
+
 bool Sensor::setUpdateDelay(int ms) // dodać log
 {
 	if (ms == 0)
 	{
 		updateDelay = minDelay;
-		// LOG: Minimalna wartość odświeżania ustawiona
 		return false;
 	}
 	else if (minDelay > ms || ms < 0)
@@ -25,12 +33,17 @@ bool Sensor::setUpdateDelay(int ms) // dodać log
 void Sensor::SDbufferClear()
 {
 	SDbuffer = "";
-	//packetReady = false;
 }
 
 bool Sensor::timeForUpdate()
 {
 	return (millis() - lastUpdate > updateDelay && Status == STA_INITIALIZED);
+}
+
+void Sensor::successUpdateFinish()
+{
+	lastUpdate = millis();
+	newReading = true;
 }
 
 /*

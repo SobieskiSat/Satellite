@@ -8,7 +8,7 @@
 
 using namespace SobieskiSat;
 
-GPS::GPS() : gps(&Serial1) { ID = 'G'; }
+GPS::GPS() : gps(&Serial1), Sensor()  { ID = 'G'; }
 
 bool GPS::begin()
 {
@@ -51,7 +51,8 @@ bool GPS::update()
 			SDbuffer += "\r\n";
 			SDbuffer += String(Latitude, PREC_LAT) + " " + String(Longitude, PREC_LON) + " " + String(Altitude, PREC_ALT) + " " + RecievedDate.getString() + " @" + String(millis());
 			SDbuffer += "\r\n";
-						
+					
+			successUpdateFinish();
 			return true;
 		}
 	}

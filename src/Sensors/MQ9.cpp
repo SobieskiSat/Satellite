@@ -7,7 +7,7 @@
 
 using namespace SobieskiSat;
 
-MQ9::MQ9() { ID = 'M'; }
+MQ9::MQ9() : Sensor() { ID = 'M'; }
 		
 bool MQ9::begin()
 {
@@ -29,7 +29,7 @@ bool MQ9::update()
 	{
 		AirQuality = analogRead(PIN_MQ9);
 		
-		lastUpdate = millis();
+		successUpdateFinish();
 		return true;
 	}
 	else return false;

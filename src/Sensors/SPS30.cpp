@@ -6,7 +6,7 @@
 
 using namespace SobieskiSat;
 
-SPS30::SPS30() { ID = 'S'; }
+SPS30::SPS30() : Sensor() { ID = 'S'; }
 
 bool SPS30::begin()
 {
@@ -47,7 +47,7 @@ bool SPS30::update()
 		SDbuffer += String(PM1_0, PREC_SPS) + " " + String(PM2_5, PREC_SPS) + " " + String(PM4_0, PREC_SPS) + " " + String(PM10_0, PREC_SPS) + " @" + String(millis());
 		SDbuffer += "\r\n";
 				
-		lastUpdate = millis();
+		successUpdateFinish();
 		return true;
 	}
 	return false;

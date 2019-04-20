@@ -7,7 +7,7 @@
 
 using namespace SobieskiSat;
 
-PHR::PHR() { ID = 'M'; }
+PHR::PHR() : Sensor() { ID = 'M'; }
 		
 bool PHR::begin()
 {
@@ -29,7 +29,7 @@ bool PHR::update()
 	{
 		Light = analogRead(PIN_PHR);
 		
-		lastUpdate = millis();
+		successUpdateFinish();
 		return true;
 	}
 	else return false;
