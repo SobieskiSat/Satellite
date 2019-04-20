@@ -4,5 +4,6 @@
 #include <Arduino.h>
 
 static String compressorFormats = "";
+static String nameChain = "";
 
 #endif

@@ -21,6 +21,6 @@ void setup() {
   SerialUSB.println("Umieść te wartości w pliku 'compressor_formats.h' znajdującego się folderze z programem stacji naziemnej");
   SerialUSB.println("compressorFormat:");
   SerialUSB.println(formats);
-  SerialUSB.println("name_chain:");
+  SerialUSB.println("nameChain:");
   SerialUSB.println("SendNum Latitude Longitude Altitude Pressure Temperature AirQuality PM10 PM25 PM40 PM100 Humidity Battery");
 }
