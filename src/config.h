@@ -57,6 +57,14 @@
 #define UPD_MPU 0
 #define UPD_BAT 5000
 #define UPD_PHR 30
+
+#define DEL_BEFTRAN 0
+#define DEL_BETWEENTRAN 0
+#define DEL_AFTTRAN 0
+#define DEL_BEFSAVE 0
+#define DEL_BETWEENSAVE 5000
+#define DEL_AFTSAVE 0
+#define DEL_SAVETRAN 0
 	
 // opóźnienie pierwszego odczytu (ms)
 #define DEL_SPS 10000
@@ -72,6 +80,8 @@
 
 #define MODE_TX 0
 #define MODE_RX 1
+
+#define NAMECHAIN "SNU LAT LON ALT PRE TEM AIR PM10 PM25 PM40 PM100 HUM BAT"
 
 /*
 enum class SensorStatus

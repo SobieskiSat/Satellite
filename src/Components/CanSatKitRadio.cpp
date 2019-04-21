@@ -5,12 +5,13 @@
 
 #include "CanSatKitRadio.h"
 #include "fifo.h"
+#include "../src/utilities.h"
+#include "../src/config.h"
 
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using namespace SobieskiSat;
-
 
 // FIFO for 10 frames
 FIFO<uint8_t, 2571> fifo_tx, fifo_rx;
@@ -22,7 +23,6 @@ static Radio::SpreadingFactor spreadingFactor;
 static Radio::CodingRate codingRate;
 
 static bool debug_enabled = true;
-
 
 static constexpr uint8_t SPI_READ = 0b00000000;
 static constexpr uint8_t SPI_WRITE = 0b10000000;
@@ -459,24 +459,24 @@ void radio_interrupt() {
   
 // TX mode
 
-bool Radio::transmit(Frame frame) {
-  return transmit(frame.operator const char*());
+bool Radio::transmit(Frame frame, long& lastTransmit) {
+  return transmit(frame.operator const char*(), lastTransmit);
 }
 
-bool Radio::transmit(const char* str) {
+bool Radio::transmit(const char* str, long& lastTransmit) {
   auto length = strlen(str);
   if (length >= 255) {
     return false;
   }
   // transmit frame with the null-termination character included
-  return transmit(reinterpret_cast<const uint8_t*>(str), length + 1);
+  return transmit(reinterpret_cast<const uint8_t*>(str), length + 1, lastTransmit);
 }
 
-bool Radio::transmit(String str) {
-  return transmit(str.c_str());
+bool Radio::transmit(String str, long& lastTransmit) {
+  return transmit(str.c_str(), lastTransmit);
 }
 
-bool Radio::transmit(const uint8_t* data, uint8_t length) {
+bool Radio::transmit(const uint8_t* data, uint8_t length, long& lastTransmit) {
   if (length == 0) {
     if (debug_enabled) {
       SerialUSB.println("[radio] empty frame!");
@@ -490,6 +490,7 @@ bool Radio::transmit(const uint8_t* data, uint8_t length) {
     return false;
   }
 
+  delay(DEL_BEFTRAN);
   // begin transaction just to block interrupt
   SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
   
@@ -513,6 +514,8 @@ bool Radio::transmit(const uint8_t* data, uint8_t length) {
   
   SPI.endTransaction();
   
+  lastTransmit = millis();
+  delay(DEL_AFTTRAN);
   return true;
 }
 
@@ -556,4 +559,11 @@ int Radio::get_rssi_last() {
 
 int Radio::get_rssi_now() {
   return -164 + read_register(SX1278_REG_RSSI_VALUE);
+}
+
+bool Radio::timeForTransmit(long& lastSave, long& lastTransmit)
+{
+	if (tx_fifo_empty() &&
+		abs(lastSave - lastTransmit) > DEL_SAVETRAN &&
+		millis() - lastTransmit > DEL_BETWEENTRAN) return true;
 }

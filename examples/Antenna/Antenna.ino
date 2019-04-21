@@ -4,7 +4,6 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "logo.h"
-#include "compressor_formats.h"
 
 using namespace SobieskiSat;
 
@@ -53,7 +52,7 @@ void setup()
   delay(500);
 
   radio.begin();
-  compressor.begin(compressorFormats);
+  compressor.begin(MODE_RX);
 }
 
 void loop()
@@ -80,11 +79,11 @@ void loop()
   display.print("RSSI: ");
   display.println(rssi);
   display.print("H: ");
-  display.println(String(compressor.retrieve("Altitude").value));
+  display.println(String(compressor.retrieve("ALT").value));
   display.print("P: ");
-  display.println(String(int(compressor.retrieve("PackNo").value))+ " " + String(reciNum, 0));
+  display.println(String(int(compressor.retrieve("SNU").value))+ " " + String(reciNum, 0));
   display.print("T: ");
-  display.println(String(compressor.retrieve("Temperature").value));
+  display.println(String(compressor.retrieve("TEM").value));
   
   display.display();
   
@@ -107,28 +106,28 @@ void DrawLogo(void) {
 // wgrywa odbrane dane do fantomów sensorów
 void UploadToPhantoms()
 {
-  compressor.download("SendNum", sendNum);
   rssi = radio.get_rssi_last();
-  compressor.download("Latitude", gps.Latitude);
-  compressor.download("Longitude", gps.Longitude);
-  compressor.download("Altitude", gps.Altitude);
-  compressor.download("Pressure", bmp.Pressure);
-  compressor.download("Temperature", bmp.Temperature);
-  compressor.download("AirQuality", mq9.AirQuality);
+  compressor.download("SNU", sendNum);
+  compressor.download("LAT", gps.Latitude);
+  compressor.download("LON", gps.Longitude);
+  compressor.download("ALT", gps.Altitude);
+  compressor.download("PRE", bmp.Pressure);
+  compressor.download("TEM", bmp.Temperature);
+  compressor.download("AIR", mq9.AirQuality);
   compressor.download("PM10", sps.PM1_0);
   compressor.download("PM25", sps.PM2_5);
   compressor.download("PM40", sps.PM4_0);
   compressor.download("PM100", sps.PM10_0);
-  compressor.download("Humidity", dht.Humidity);
-  compressor.download("Battery", battery.Reading);
+  compressor.download("HUM", dht.Humidity);
+  compressor.download("BAT", battery.Reading);
 }
 
 
 // wypisuje dane wszystkich sensorów
 void PrintSensors()
 {
-  SerialUSB.print(String(sendNum, 0) + "_");
   SerialUSB.print(String(rssi, 0) + "_");
+  SerialUSB.print(String(sendNum, 0) + "_");
   SerialUSB.print(String(gps.Latitude, PREC_LAT) + "_");
   SerialUSB.print(String(gps.Longitude, PREC_LON) + "_");
   SerialUSB.print(String(gps.Altitude, PREC_ALT) + "_");

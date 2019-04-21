@@ -6,6 +6,7 @@
 #include <SPI.h>
 #include <SD.h>
 #include "../src/config.h"
+#include "../src/utilities.h"
 
 using namespace SobieskiSat;
 
@@ -55,22 +56,26 @@ bool Logger::begin()
 	else return false;
 }
 
-bool Logger::save(Sensor& sensor)
+bool Logger::save(Sensor& sensor, long& lastSave)
 {
 	if (Status == STA_INITIALIZED)
 	{
-	if (sensor.SDbuffer != "")
-	{
-		File file = SD.open(rootDir + sensor.fileName, FILE_WRITE);
-		if (file)
+		if (sensor.SDbuffer != "")
 		{
-			file.print(sensor.SDbuffer);
-			sensor.SDbufferClear();
-			file.close();
-			return true;
+			delay(DEL_BEFSAVE);
+			File file = SD.open(rootDir + sensor.fileName, FILE_WRITE);
+			if (file)
+			{
+				file.print(sensor.SDbuffer);
+				sensor.SDbufferClear();
+				file.close();
+				lastSave = millis();
+				delay(DEL_AFTSAVE);
+				return true;
+			}
+			delay(DEL_AFTSAVE);
+			return false;
 		}
-		return false;
-	}
 	}
 	return false;
 }
@@ -78,24 +83,41 @@ bool Logger::save(Sensor& sensor)
 void Logger::logMessage(const String msg)
 {
 	if (LOG_SD == 1) SerialUSB.println(msg);
-	if (LOG_SERIAL == 1) temp_buffer += msg + "\r\n";
+	if (LOG_SERIAL == 1)
+	{
+		temp_buffer += msg;
+		temp_buffer += "\r\n";
+	}
 }
 
-bool Logger::saveBuffer()
+bool Logger::saveBuffer(long& lastSave)
 {
-	buffer += temp_buffer;
-	temp_buffer = "";
-	if (buffer != "")
+	if (Status == STA_INITIALIZED)
 	{
-		File file = SD.open(rootDir + "LOG.TXT", FILE_WRITE);
-		if (file)
+		buffer += temp_buffer;
+		if (buffer != "")
 		{
-			file.print(buffer);
-			file.close();
-			buffer = "";
-			SerialUSB.println("[L] Logged to SD.");
-			return true;
+			delay(DEL_BEFSAVE);
+			File file = SD.open(rootDir + "LOG.TXT", FILE_WRITE);
+			if (file)
+			{
+				file.print(buffer);
+				file.close();
+				buffer = "";
+				temp_buffer = "";
+				delay(DEL_AFTSAVE);
+				return true;
+			}
+			lastSave = millis();
+			delay(DEL_AFTSAVE);
+			return false;
 		}
 	}
 	return false;
+}
+
+bool Logger::timeForSave(long& lastSave, long& lastTransmit)
+{
+	if (millis() - lastSave > DEL_BETWEENSAVE &&
+		abs(lastSave - lastTransmit) > DEL_SAVETRAN) return true;
 }

@@ -9,15 +9,18 @@ Compressor compressor;
 Logger logger;
 
 float sendNum = 0;  // numer wysłanego pakietu
-GPS gps;            // obiekty fantomów sensorów przechowujące ostatio otrzymane dane
+GPS gps;            
 BMP280 bmp;
 SPS30 sps;
 MQ9 mq9;            // (analog)
 DHT22 dht;
-PHT photo;
+PHR photo;
 BAT battery;
 
 Player buzzer;
+bool state = false;
+long lastSave;
+long lastTransmit;
 
 void setup() {
   SerialUSB.begin(115200);
@@ -25,7 +28,7 @@ void setup() {
 
   buzzer.begin(5);
 
-  compressor.begin();
+  compressor.begin(MODE_TX);
   compressor.clear();
   logger.begin();
 
@@ -40,8 +43,6 @@ void setup() {
   radio.begin();
 
   buzzer.play(2);
-  
-  lastSave = millis();
 }
 
 void loop() {
@@ -56,41 +57,39 @@ void loop() {
 
   buzzer.update();
 
-  if (radio.timeForTransmit())
+  if (radio.timeForTransmit(lastSave, lastTransmit))
   {
       compressor.clear();
 
-      compressor.attach("SendNum", sendNum);
-      compressor.attach("Latitude", gps.Latitude);
-      compressor.attach("Longitude",  gps.Longitude);
-      compressor.attach("Altitude", gps.Altitude);
-      compressor.attach("Pressure", bmp.Pressure);
-      compressor.attach("Temperature", bmp.Temperature);
-      compressor.attach("AirQuality", mq9.AirQuality);
+      compressor.attach("SNU", sendNum);
+      compressor.attach("LAT", gps.Latitude);
+      compressor.attach("LON",  gps.Longitude);
+      compressor.attach("ALT", gps.Altitude);
+      compressor.attach("PRE", bmp.Pressure);
+      compressor.attach("TEM", bmp.Temperature);
+      compressor.attach("AIR", mq9.AirQuality);
       compressor.attach("PM10", sps.PM1_0);
       compressor.attach("PM25", sps.PM2_5);
       compressor.attach("PM40", sps.PM4_0);
       compressor.attach("PM100", sps.PM10_0);
-      compressor.attach("Humidity", dht.Humidity);
-      compressor.attach("Battery", battery.Level);
+      compressor.attach("HUM", dht.Humidity);
+      compressor.attach("BAT", battery.Level);
 
-      radio.transmit(compressor.getData());
+      radio.transmit(compressor.getData(), lastTransmit);
       
       digitalWrite(PIN_LED, state);
       state = !state;
-
-      catchedEmpty = false;
   }
 
-  if (logger.timeForSave())
+  if (logger.timeForSave(lastSave, lastTransmit))
   {
-    logger.save(gps);
-    logger.save(bmp);
-    logger.save(mq9);
-    logger.save(sps);
-    logger.save(dht);
-    logger.save(battery);
-    logger.save(photo);
-    logger.saveBuffer();
+    logger.save(gps, lastSave);
+    logger.save(bmp, lastSave);
+    logger.save(mq9, lastSave);
+    logger.save(sps, lastSave);
+    logger.save(dht, lastSave);
+    logger.save(battery, lastSave);
+    logger.save(photo, lastSave);
+    logger.saveBuffer(lastSave);
   }
 }

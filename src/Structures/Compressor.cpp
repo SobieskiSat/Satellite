@@ -12,7 +12,6 @@ void Compressor::clear()
 		data[i] = 0b00000000;
 	}
 	currentBit = 0;
-	currentFormat = "";
 	receivedLenght = 0;
 }
 
@@ -23,44 +22,40 @@ void Compressor::begin(int mode)
 	if (mode == MODE_RX)
 	{
 		Transmitter = false;
-		formats = "";
-		generateFormat("SNU LAT LON ALT PRE TEM AIR PM10 PM25 PM40 PM100 HUM BAT");
-		generateFormat("SNU LAT LON ALT PRE TEM AIR");
+		format = "";
+		generateFormat();
 	}
 	else { Transmitter = true; }
 }
 
 // Zwraca format na podstawie zmiennych podanych w 'nameChain'
-void Compressor::generateFormat(String particularNameChain)
+void Compressor::generateFormat()
 {
 	// nameChain: PackNo Laitude Longitude Altitude...
-	// return: ID formatu (lenght)~START_STOP_NAME_MAX_MIN_PREC .. START_STOP_NAME_MAX_MIN_PREC ;
-	int namesCount = ElementCount(particularNameChain, ' ');
-	int lenght = 0;
+	// return: ID formatu (lenght)~START_STOP_NAME_MAX_MIN_PREC .. START_STOP_NAME_MAX_MIN_PREC;
+	int namesCount = ElementCount(NAMECHAIN, ' ');
+	formatBitLenght = 0;
 	for (int i = 0; i < namesCount; i++)
 	{
-		lenght += FindDataPacket(Element(particularNameChain, ' ', i)).getBitCount();
+		formatBitLenght += FindDataPacket(Element(NAMECHAIN, ' ', i)).getBitCount();
 	}
+	formatByteLenght = BitsToBytes(formatBitLenght);
 	
 	int bitIndex = 0;
-	
-	if (formats != "") formats += "|";
-	formats += String(lenght);
-	formats += "~";
 	for (int i = 0; i < namesCount; i++)
 	{
-		String name = Element(particularNameChain, ' ', i);
+		String name = Element(NAMECHAIN, ' ', i);
 		DataPacket prototype = FindDataPacket(name);
-		formats += String(bitIndex);
-		formats += "_";
-		formats += String(bitIndex + prototype.getBitCount());
-		formats += "_";
-		formats += prototype.toString();
-		if (i != namesCount - 1) formats += " ";
+		format += String(bitIndex);
+		format += "_";
+		format += String(bitIndex + prototype.getBitCount());
+		format += "_";
+		format += prototype.toString();
+		if (i != namesCount - 1) format += " ";
 		bitIndex += prototype.getBitCount();
 	}
 	
-	return formats;
+	chainElements = ElementCount(format, ' ');
 }
 
 void Compressor::attach(String name, float value) // zmienić
@@ -78,13 +73,12 @@ void Compressor::attach(String name, float value) // zmienić
 
 String Compressor::getData()
 {
-	String formats = "";
-	int bytesCount = Element(currentFormat, '~', 0).toInt();
-	for (int i = 0; i < bytesCount; i++)
+	String toRetrun = "";
+	for (int i = 0; i < formatByteLenght; i++)
 	{
-		formats += data[i];
+		toRetrun += data[i];
 	}
-	return formats;
+	return toRetrun;
 }
 
 // ################# DECOMPRESSION ####################
@@ -96,14 +90,14 @@ void Compressor::push(int lenght, char *data_)
 		data[i] = data_[i];
 	}
 	receivedLenght = lenght;
-	matchFormat();
 }
 
 DataPacket Compressor::retrieve(String name)
-{
+{	
 	int openingBit;
 	int closingBit;
 	DataPacket found = getDataPacketLocation(name, openingBit, closingBit);
+	if (closingBit >= receivedLenght) return DataPacket("NRC", 0, 0, 0);
 	
 	int closingByte = BitsToBytes(closingBit);
 	bool finished = false;
@@ -135,11 +129,9 @@ DataPacket Compressor::retrieve(String name)
 DataPacket Compressor::getDataPacketLocation(String name, int& openingBit, int& closingBit)
 {
 	// definition: START_STOP_NAME_MAX_MIN_PREC
-	
-	int elementCount = ElementCount(currentFormat, ' ');
-	for (int i = 0; i < elementCount; i++)
+	for (int i = 0; i < chainElements; i++)
 	{
-		String definitionCandidate = Element(currentFormat, ' ', i);
+		String definitionCandidate = Element(format, ' ', i);
 		String elementName = Element(definitionCandidate, '_', 2);
 		if (elementName == name)
 		{
@@ -153,24 +145,32 @@ DataPacket Compressor::getDataPacketLocation(String name, int& openingBit, int& 
 	}
 	
 	LogMessage("[Error] In file: //src//Structures//Compressor.cpp - getDataPacketLocation, DataPacket could not be found inside format. Input: {" + name + "}");
-	return DataPacket("InvalidName", 0, 0, 0);
+	return DataPacket("INV", 0, 0, 0);
 }
 
 void Compressor::download(String name, float& variable)
 {
-	variable = retrieve(name).value;
+	DataPacket retrieved = retrieve(name);
+	if (retrieved.name != "NRC") variable = retrieved.value;
 }
 
+/*
 void Compressor::matchFormat()
 {
-	int formatCount = ElementCount(formats, '|'); // do zmiany char -> String jako separator
-	for (int i = 0; i < formatCount; i++)
+	int candidateLenght = 0; // in bits
+	candidateLenght += FindDataPacket("SNU").getBitCount();
+	candidateLenght += FindDataPacket("LAT").getBitCount();
+	candidateLenght += FindDataPacket("LON").getBitCount();
+	candidateLenght += FindDataPacket("ALT").getBitCount();
+	candidateLenght += FindDataPacket("PRE").getBitCount();
+	candidateLenght += FindDataPacket("TEM").getBitCount();
+	candidateLenght += FindDataPacket("AIR").getBitCount(); // minimal format
+	
+	for (int i = 7; i < chainElements; i++)
 	{
-		String formatCandidate = Element(formats, '|', i);
-		int candidateLenght = Element(formatCandidate, '~', 0).toInt();
-		if (receivedLenght == candidateLenght) currentFormat = Element(formatCandidate, '~', 1);
+		if (candidateLenght == receivedLenght)
 	}
 	
 	LogMessage("[Error] In file: //src//Structures//Compressor.cpp - matchFormat, No format could be matched to received lenght.");
-	currentFormat = "";
 }
+*/

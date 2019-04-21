@@ -7,7 +7,6 @@
 
 namespace SobieskiSat
 {
-		
 	static void (*LogMessage)(const String msg) = {};
 
 	inline static int BitsToBytes(const int bitCount)

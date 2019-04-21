@@ -18,8 +18,9 @@ namespace SobieskiSat
 		bool printUSB = true;
 		
 		bool begin();
-		bool save(Sensor& sensor);
-		bool saveBuffer();
+		bool save(Sensor& sensor, long& lastSave);
+		bool saveBuffer(long& lastSave);
+		bool timeForSave(long& lastSave, long& lastTransmit);
 		
 		private:
 		

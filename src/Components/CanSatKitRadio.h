@@ -116,25 +116,25 @@ class Radio {
    * @brief Put frame into the transmit buffer.
    * @return `true` if frame put into buffer. `false` if not enough space in the buffer.
    */
-  static bool transmit(Frame frame);
+  static bool transmit(Frame frame, long& lastTransmit);
 
   /**
    * @brief Put String str into the transmit buffer.
    * @return `true` if frame put into buffer. `false` if not enough space in the buffer.
    */
-  static bool transmit(String str);
+  static bool transmit(String str, long& lastTransmit);
 
   /**
    * @brief Put string str into the transmit buffer.
    * @return `true` if frame put into buffer. `false` if not enough space in the buffer.
    */
-  static bool transmit(const char* str);
+  static bool transmit(const char* str, long& lastTransmit);
 
   /**
    * @brief Put binary data into the transmit buffer (byte table of length length).
    * @return `true` if frame put into buffer. `false` if not enough space in the buffer.
    */
-  static bool transmit(const std::uint8_t* data, std::uint8_t length);
+  static bool transmit(const std::uint8_t* data, std::uint8_t length, long& lastTransmit);
 
   /**
    * @brief Waits until all frames in the transmit buffer are transmitted.
@@ -183,6 +183,8 @@ class Radio {
    * @return int RSSI in dBm
    */
   static int get_rssi_now();
+  
+  static bool timeForTransmit(long& lastSave, long& lastTransmit);
 };
 
 constexpr static auto Bandwidth_7800_Hz = Radio::Bandwidth::_7800_Hz;
