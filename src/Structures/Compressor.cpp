@@ -1,7 +1,6 @@
 #include "Compressor.h"
 #include "Arduino.h"
 #include <math.h>
-#include "../src/Sensors/Sensor.h"
 #include "../src/utilities.h"
 
 using namespace SobieskiSat;
@@ -13,19 +12,26 @@ void Compressor::clear()
 		data[i] = 0b00000000;
 	}
 	currentBit = 0;
-	currentFormat = "empty";
+	currentFormat = "";
 	receivedLenght = 0;
 }
 
 // ####################### COMPRESSION #########################
 
-void Compressor::begin()
+void Compressor::begin(int mode)
 {
-	Transmitter = false;
+	if (mode == MODE_RX)
+	{
+		Transmitter = false;
+		formats = "";
+		generateFormat("SNU LAT LON ALT PRE TEM AIR PM10 PM25 PM40 PM100 HUM BAT");
+		generateFormat("SNU LAT LON ALT PRE TEM AIR");
+	}
+	else { Transmitter = true; }
 }
 
 // Zwraca format na podstawie zmiennych podanych w 'nameChain'
-String Compressor::generateFormat(String particularNameChain)
+void Compressor::generateFormat(String particularNameChain)
 {
 	// nameChain: PackNo Laitude Longitude Altitude...
 	// return: ID formatu (lenght)~START_STOP_NAME_MAX_MIN_PREC .. START_STOP_NAME_MAX_MIN_PREC ;
@@ -36,20 +42,25 @@ String Compressor::generateFormat(String particularNameChain)
 		lenght += FindDataPacket(Element(particularNameChain, ' ', i)).getBitCount();
 	}
 	
-	String toReturn = "";
 	int bitIndex = 0;
 	
-	toReturn += String(lenght, 0) + "~";
-	for (int i = 1; i < namesCount; i++)
+	if (formats != "") formats += "|";
+	formats += String(lenght);
+	formats += "~";
+	for (int i = 0; i < namesCount; i++)
 	{
 		String name = Element(particularNameChain, ' ', i);
 		DataPacket prototype = FindDataPacket(name);
-		toReturn += String(bitIndex, 0) + "_" + String(bitIndex + prototype.getBitCount(), 0) + "_";
-		toReturn += prototype.toString();
+		formats += String(bitIndex);
+		formats += "_";
+		formats += String(bitIndex + prototype.getBitCount());
+		formats += "_";
+		formats += prototype.toString();
+		if (i != namesCount - 1) formats += " ";
 		bitIndex += prototype.getBitCount();
 	}
 	
-	return toReturn;
+	return formats;
 }
 
 void Compressor::attach(String name, float value) // zmienić
@@ -67,22 +78,16 @@ void Compressor::attach(String name, float value) // zmienić
 
 String Compressor::getData()
 {
-	String toReturn = "";
+	String formats = "";
 	int bytesCount = Element(currentFormat, '~', 0).toInt();
 	for (int i = 0; i < bytesCount; i++)
 	{
-		toReturn += data[i];
+		formats += data[i];
 	}
-	return toReturn;
+	return formats;
 }
 
 // ################# DECOMPRESSION ####################
-
-void Compressor::begin(String formats_)
-{
-	Transmitter = true;
-	formats = formats_;
-}
 
 void Compressor::push(int lenght, char *data_)
 {
@@ -167,5 +172,5 @@ void Compressor::matchFormat()
 	}
 	
 	LogMessage("[Error] In file: //src//Structures//Compressor.cpp - matchFormat, No format could be matched to received lenght.");
-	currentFormat = "empty";
+	currentFormat = "";
 }

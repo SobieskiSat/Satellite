@@ -25,28 +25,28 @@
 #define PREC_MPU 7
 
 // minimalne przewidywane odczyty (sensory wysyłane przez radio)
-#define MIN_SNU 0
+#define MIN_SNU 0.0
 #define MIN_LAT 49.0
 #define MIN_LON 14.07
 #define MIN_ALT 0.0
 #define MIN_PRE 600.0
 #define MIN_TEM -10.0
-#define MIN_AIR 0
+#define MIN_AIR 0.0
 #define MIN_SPS 0.0
 #define MIN_HUM 0.0
-#define MIN_BAT 0
+#define MIN_BAT 0.0
 	
 // maksymalne przewidywane odczyty (sensory wysyłane przez radio)
-#define MAX_SNU 128 
+#define MAX_SNU 128.0
 #define MAX_LAT 52.0
 #define MAX_LON 24.09
 #define MAX_ALT 6553.0
 #define MAX_PRE 1100.0
 #define MAX_TEM 50.0
-#define MAX_AIR 4096
+#define MAX_AIR 4096.0
 #define MAX_SPS 102.4
 #define MAX_HUM 100.0
-#define MAX_BAT 4096
+#define MAX_BAT 4096.0
 	
 // czas między pomiarami, 0 oznacza najmniejszy możliwy
 #define UPD_GPS 0
@@ -69,6 +69,9 @@
 #define STA_ERROR 4
 #define STA_DISABLED 5
 #define STA_PHANTOM 6
+
+#define MODE_TX 0
+#define MODE_RX 1
 
 /*
 enum class SensorStatus

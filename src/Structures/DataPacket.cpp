@@ -29,9 +29,15 @@ DataPacket::DataPacket (String name_, float bottom_limit, float upper_limit, int
 
 String DataPacket::toString()
 {
+	if (decimals > 0)
 	return  name + "_" + 
 			String(bottomLimit, decimals) + "_" +
 			String(upperLimit, decimals) + "_" +
+			String(decimals);
+	else
+	return  name + "_" + 
+			String((int)bottomLimit) + "_" +
+			String((int)upperLimit) + "_" +
 			String(decimals);
 }
 

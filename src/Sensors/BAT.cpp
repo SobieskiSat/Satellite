@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "Sensors.h"
 #include "Sensor.h"
-#include <cmath>
+//#include <cmath>
 #include "../src/config.h"
 
 
