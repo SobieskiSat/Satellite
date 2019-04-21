@@ -563,7 +563,7 @@ int Radio::get_rssi_now() {
 
 bool Radio::timeForTransmit(long& lastSave, long& lastTransmit)
 {
-	if (tx_fifo_empty() &&
-		abs(lastSave - lastTransmit) > DEL_SAVETRAN &&
-		millis() - lastTransmit > DEL_BETWEENTRAN) return true;
+	return (tx_fifo_empty() &&
+			abs(lastSave - lastTransmit) > DEL_SAVETRAN &&
+			millis() - lastTransmit > DEL_BETWEENTRAN);
 }

@@ -69,10 +69,10 @@ bool Logger::save(Sensor& sensor, long& lastSave)
 				file.print(sensor.SDbuffer);
 				sensor.SDbufferClear();
 				file.close();
-				lastSave = millis();
 				delay(DEL_AFTSAVE);
 				return true;
 			}
+			lastSave = millis();
 			delay(DEL_AFTSAVE);
 			return false;
 		}
@@ -118,6 +118,6 @@ bool Logger::saveBuffer(long& lastSave)
 
 bool Logger::timeForSave(long& lastSave, long& lastTransmit)
 {
-	if (millis() - lastSave > DEL_BETWEENSAVE &&
-		abs(lastSave - lastTransmit) > DEL_SAVETRAN) return true;
+	return (millis() - lastSave > DEL_BETWEENSAVE &&
+			abs(lastSave - lastTransmit) > DEL_SAVETRAN);
 }
