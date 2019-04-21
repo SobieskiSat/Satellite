@@ -63,6 +63,7 @@ void loop() {
 
   if (radio.tx_fifo_empty())
   {
+	  delay(30);
       compressor.clear();
 
       compressor.attach("SNU", sendNum);
@@ -83,10 +84,12 @@ void loop() {
       
       digitalWrite(PIN_LED, state);
       state = !state;
+	  delay(30);
   }
 
   if (millis() - lastSave > 5000)
   {
+    delay(30);
     logger.save(gps, lastSave);
     logger.save(bmp, lastSave);
     logger.save(mq9, lastSave);
@@ -95,5 +98,6 @@ void loop() {
     logger.save(battery, lastSave);
     logger.save(photo, lastSave);
     logger.saveBuffer(lastSave);
+	delay(30);
   }
 }
