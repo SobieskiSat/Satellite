@@ -61,7 +61,7 @@ void Compressor::generateFormat()
 void Compressor::attach(String name, float value) // zmienić
 {
 	DataPacket prototype = FindDataPacket(name);
-	unsigned int absolute = (unsigned int)((value - prototype.bottomLimit) * pow(10, prototype.decimals) + 0.5f); // 0.5f czy jest tak na pewno?/???????????
+	unsigned int absolute = (unsigned int)((value - prototype.bottomLimit) * pow(10, prototype.decimals)); // 0.5f czy jest tak na pewno?/???????????
 	int openingBit = currentBit;
 	
 	while (currentBit < openingBit + prototype.getBitCount())
