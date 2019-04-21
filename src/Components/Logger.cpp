@@ -15,7 +15,7 @@ String temp_buffer = "";
 bool Logger::begin()
 {
 	Status = STA_DURINGINIT;
-	LogMessage = logMessage;
+	//LogMessage = logMessage;
 	
 	if (SD.begin(PIN_SD))
 	{

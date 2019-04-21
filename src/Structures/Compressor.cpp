@@ -144,7 +144,7 @@ DataPacket Compressor::getDataPacketLocation(String name, int& openingBit, int& 
 		}
 	}
 	
-	LogMessage("[Error] In file: //src//Structures//Compressor.cpp - getDataPacketLocation, DataPacket could not be found inside format. Input: {" + name + "}");
+	//LogMessage("[Error] In file: //src//Structures//Compressor.cpp - getDataPacketLocation, DataPacket could not be found inside format. Input: {" + name + "}");
 	return DataPacket("INV", 0, 0, 0);
 }
 

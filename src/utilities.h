@@ -38,7 +38,7 @@ namespace SobieskiSat
 			index++;
 		}
 		
-		LogMessage("[Error] In file: //src//utilities.h, targetIndex was out of range. Inputs: {" + toSeparate + "} {" + String(separator) + "} {" + String(targetIndex) + "}");
+		//LogMessage("[Error] In file: //src//utilities.h, targetIndex was out of range. Inputs: {" + toSeparate + "} {" + String(separator) + "} {" + String(targetIndex) + "}");
 		return "InvalidIndex";
 	};
 	

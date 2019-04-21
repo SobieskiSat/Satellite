@@ -35,7 +35,7 @@ bool BMP280::begin()
 		setUpdateDelay(UPD_BMP);
 		
 		Status = STA_INITIALIZED; // dodać procedurę testu i kalibracji
-		LogMessage("Success");
+		//LogMessage("Success");
 	}
 	
 	return (Status == STA_INITIALIZED);
