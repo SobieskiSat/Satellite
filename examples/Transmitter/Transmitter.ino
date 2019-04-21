@@ -42,7 +42,11 @@ void setup() {
   
   radio.begin();
 
+  lastSave = millis() + 10;
+  lastTransmit = millis();
+  
   buzzer.play(2);
+  SerialUSB.println("Finished setup!");
 }
 
 void loop() {
@@ -57,7 +61,7 @@ void loop() {
 
   buzzer.update();
 
-  if (radio.timeForTransmit(lastSave, lastTransmit))
+  if (radio.tx_fifo_empty())
   {
       compressor.clear();
 
@@ -81,7 +85,7 @@ void loop() {
       state = !state;
   }
 
-  if (logger.timeForSave(lastSave, lastTransmit))
+  if (millis() - lastSave > 5000)
   {
     logger.save(gps, lastSave);
     logger.save(bmp, lastSave);

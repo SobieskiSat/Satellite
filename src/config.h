@@ -64,7 +64,7 @@
 #define DEL_BEFSAVE 0
 #define DEL_BETWEENSAVE 5000
 #define DEL_AFTSAVE 0
-#define DEL_SAVETRAN 0
+#define DEL_SAVETRAN 30
 	
 // opóźnienie pierwszego odczytu (ms)
 #define DEL_SPS 10000
