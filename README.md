@@ -1,4 +1,6 @@
 # Satellite
-Code for satellite 
+Code for satellite and antenna board
 ## Use
-run by station.py
+Upload examples>Transmitter to satellite board.
+Upload examples>Antenna to antenna board.
+Use examples>Sensor_test to check sensor readings.
