@@ -12,7 +12,7 @@ namespace SobieskiSat
 	inline static int BitsToBytes(const int bitCount)
 	{
 		int bytes = 0;
-		while (pow(bytes, 2) < bitCount) bytes++;
+		while (pow(2, bytes) < bitCount) bytes++;
 		return bytes;
 	};
 
