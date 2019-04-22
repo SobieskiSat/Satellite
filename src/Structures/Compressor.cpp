@@ -99,7 +99,7 @@ void Compressor::push(int lenght, char* data_)
 DataPacket Compressor::find(char name, int& startBit, int& endBit)
 {
 	int ind = 0;
-	String current[5];
+	String current[6];
 	int varNum = 0;
 	while (ind < COMPR_FORMLENGHT)
 	{
@@ -128,7 +128,7 @@ DataPacket Compressor::find(char name, int& startBit, int& endBit)
 	}
 	startBit = current[0].toInt();
 	endBit = current[1].toInt();
-	return DataPacket(current[2][0], current[3].toFloat(), current[4].toFloat(), 0);
+	return DataPacket(current[2][0], current[3].toFloat(), current[4].toFloat(), current[5].toInt());
 }
 
 DataPacket Compressor::getDataPacket(char name)
