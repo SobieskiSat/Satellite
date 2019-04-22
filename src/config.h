@@ -11,8 +11,8 @@ using namespace SobieskiSat;
 
 // piny komponentów
 #define PIN_MQ9 A0
-#define PIN_BAT A2
-#define PIN_PHR A1
+#define PIN_BAT A4
+#define PIN_PHR A2
 #define PIN_LED 13
 #define PIN_DHT 3
 #define PIN_SD 11
