@@ -71,9 +71,7 @@ void loop() {
       compressor.attach('P', bmp.Pressure);
       compressor.attach('T', bmp.Temperature);
       compressor.attach('Q', mq9.AirQuality);
-      compressor.attach('1', sps.PM1_0);
       compressor.attach('2', sps.PM2_5);
-      compressor.attach('4', sps.PM4_0);
       compressor.attach('9', sps.PM10_0);
       compressor.attach('H', dht.Humidity);
       compressor.attach('B', battery.Level);

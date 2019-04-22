@@ -114,9 +114,7 @@ void UploadToPhantoms()
   compressor.download('P', bmp.Pressure);
   compressor.download('T', bmp.Temperature);
   compressor.download('Q', mq9.AirQuality);
-  compressor.download('1', sps.PM1_0);
   compressor.download('2', sps.PM2_5);
-  compressor.download('4', sps.PM4_0);
   compressor.download('9', sps.PM10_0);
   compressor.download('H', dht.Humidity);
   compressor.download('B', battery.Reading);
@@ -134,9 +132,7 @@ void PrintSensors()
   SerialUSB.print(String(bmp.Pressure, PREC_PRE) + "_");
   SerialUSB.print(String(bmp.Temperature, PREC_TEM) + "_");
   SerialUSB.print(String(mq9.AirQuality, 0) + "_");
-  SerialUSB.print(String(sps.PM1_0, PREC_SPS) + "_");
   SerialUSB.print(String(sps.PM2_5, PREC_SPS) + "_");
-  SerialUSB.print(String(sps.PM4_0, PREC_SPS) + "_");
   SerialUSB.print(String(sps.PM10_0, PREC_SPS) + "_");
   SerialUSB.print(String(dht.Humidity, PREC_HUM) + "_");
   SerialUSB.print(String(battery.getLevel(), 0) + "_");

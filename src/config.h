@@ -4,10 +4,10 @@
 #include "Structures/DataPacket.h"
 using namespace SobieskiSat;
 
-#define COMPR_FORMAT "0_8_S_0_128_0 8_24_L_49.0_52.0_7 24_40_l_14.07_24.09_7 40_56_A_0_6553_1 56_71_P_600_1100_4 71_84_T_-10.00_50.00_2 84_97_Q_0_4096_0 97_108_1_0.0_102.4_1 108_119_2_0.0_102.4_1 119_130_4_0.0_102.4_1 130_141_9_0.0_102.4_1 141_151_H_0.0_100.0_1 151_164_B_0_4096_0"
+#define COMPR_FORMAT "0_8_S_0_128_0 8_24_L_49.0_52.0_7 24_40_l_14.07_24.09_7 40_56_A_0_6553_1 56_71_P_600_1100_4 71_84_T_-10.00_50.00_2 84_97_Q_0_4096_0 97_118_2_0.0_102.4_1 118_129_9_0.0_102.4_1 129_139_H_0.0_100.0_1 139_152_B_0_4096_0"
 #define COMPR_FORMLENGHT 259
 #define COMPR_BUFFSIZE 21
-#define COMPR_NAMECHAIN "S L l A P T Q 1 2 4 9 H B"
+#define COMPR_NAMECHAIN "S L l A P T Q 2 9 H B"
 
 // piny komponentów
 #define PIN_MQ9 A0
@@ -45,7 +45,7 @@ using namespace SobieskiSat;
 #define MIN_BAT 0.0f
 	
 // maksymalne przewidywane odczyty (sensory wysyłane przez radio)
-#define MAX_SNU 128.0f
+#define MAX_SNU 255.0f
 #define MAX_LAT 52.0f
 #define MAX_LON 24.09f
 #define MAX_ALT 6553.0f
@@ -96,7 +96,8 @@ static DataPacket DAT_ALT('A', MIN_ALT, MAX_ALT, PREC_ALT);
 static DataPacket DAT_PRE('P', MIN_PRE, MAX_PRE, PREC_PRE);
 static DataPacket DAT_TEM('T', MIN_TEM, MAX_TEM, PREC_TEM);
 static DataPacket DAT_AIR('Q', MIN_AIR, MAX_AIR, 0);
-static DataPacket DAT_SPS('1', MIN_SPS, MAX_SPS, PREC_SPS);
+static DataPacket DAT_SPS('2', MIN_SPS, MAX_SPS, PREC_SPS);
+static DataPacket DAT_SPS('9', MIN_SPS, MAX_SPS, PREC_SPS);
 static DataPacket DAT_HUM('H', MIN_HUM, MAX_HUM, PREC_HUM);
 static DataPacket DAT_BAT('B', MIN_BAT, MAX_BAT, 0);
 
