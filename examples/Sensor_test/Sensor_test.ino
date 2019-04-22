@@ -2,7 +2,7 @@
 
 using namespace SobieskiSat;
 
-BMP280 sensor; // possible: BMP280, DHT22, SPS30, GPS, MPU
+BMP280 sensor; // possible: BMP280, DHT22, SPS30, GPS, MPU, MQ9, PHR, BAT
 
 void setup()
 {
