@@ -1,6 +1,14 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "Structures/DataPacket.h"
+using namespace SobieskiSat;
+
+#define COMPR_FORMAT ""
+#define COMPR_FORMLENGHT 161
+#define COMPR_BUFFSIZE 21
+#define COMPR_NAMECHAIN "S L l A P T Q 1 2 4 9 H B"
+
 // piny komponentów
 #define PIN_MQ9 A0
 #define PIN_BAT A2
@@ -25,28 +33,28 @@
 #define PREC_MPU 7
 
 // minimalne przewidywane odczyty (sensory wysyłane przez radio)
-#define MIN_SNU 0.0
-#define MIN_LAT 49.0
-#define MIN_LON 14.07
-#define MIN_ALT 0.0
-#define MIN_PRE 600.0
-#define MIN_TEM -10.0
-#define MIN_AIR 0.0
-#define MIN_SPS 0.0
-#define MIN_HUM 0.0
-#define MIN_BAT 0.0
+#define MIN_SNU 0.0f
+#define MIN_LAT 49.0f
+#define MIN_LON 14.07f
+#define MIN_ALT 0.0f
+#define MIN_PRE 600.0f
+#define MIN_TEM -10.0f
+#define MIN_AIR 0.0f
+#define MIN_SPS 0.0f
+#define MIN_HUM 0.0f
+#define MIN_BAT 0.0f
 	
 // maksymalne przewidywane odczyty (sensory wysyłane przez radio)
-#define MAX_SNU 128.0
-#define MAX_LAT 52.0
-#define MAX_LON 24.09
-#define MAX_ALT 6553.0
-#define MAX_PRE 1100.0
-#define MAX_TEM 50.0
-#define MAX_AIR 4096.0
-#define MAX_SPS 102.4
-#define MAX_HUM 100.0
-#define MAX_BAT 4096.0
+#define MAX_SNU 128.0f
+#define MAX_LAT 52.0f
+#define MAX_LON 24.09f
+#define MAX_ALT 6553.0f
+#define MAX_PRE 1100.0f
+#define MAX_TEM 50.0f
+#define MAX_AIR 4096.0f
+#define MAX_SPS 102.4f
+#define MAX_HUM 100.0f
+#define MAX_BAT 4096.0f
 	
 // czas między pomiarami, 0 oznacza najmniejszy możliwy
 #define UPD_GPS 0
@@ -81,7 +89,16 @@
 #define MODE_TX 0
 #define MODE_RX 1
 
-#define NAMECHAIN "SNU LAT LON ALT PRE TEM AIR PM10 PM25 PM40 PM100 HUM BAT"
+static DataPacket DAT_SNU('S', MIN_SNU, MAX_SNU, 0);
+static DataPacket DAT_LAT('L', MIN_LAT, MAX_LAT, PREC_LAT);
+static DataPacket DAT_LON('l', MIN_LON, MAX_LON, PREC_LON);
+static DataPacket DAT_ALT('A', MIN_ALT, MAX_ALT, PREC_ALT);
+static DataPacket DAT_PRE('P', MIN_PRE, MAX_PRE, PREC_PRE);
+static DataPacket DAT_TEM('T', MIN_TEM, MAX_TEM, PREC_TEM);
+static DataPacket DAT_AIR('Q', MIN_AIR, MAX_AIR, 0);
+static DataPacket DAT_SPS('1', MIN_SPS, MAX_SPS, PREC_SPS);
+static DataPacket DAT_HUM('H', MIN_HUM, MAX_HUM, PREC_HUM);
+static DataPacket DAT_BAT('B', MIN_BAT, MAX_BAT, 0);
 
 /*
 enum class SensorStatus

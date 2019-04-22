@@ -52,7 +52,7 @@ void setup()
   delay(500);
 
   radio.begin();
-  compressor.begin(MODE_RX);
+  compressor.clear();
 }
 
 void loop()
@@ -79,11 +79,11 @@ void loop()
   display.print("RSSI: ");
   display.println(rssi);
   display.print("H: ");
-  display.println(String(compressor.retrieve("ALT").value));
+  display.println(String(compressor.retrieve('A').value));
   display.print("P: ");
-  display.println(String(int(compressor.retrieve("SNU").value))+ " " + String(reciNum, 0));
+  display.println(String(int(compressor.retrieve('S').value))+ " " + String(reciNum, 0));
   display.print("T: ");
-  display.println(String(compressor.retrieve("TEM").value));
+  display.println(String(compressor.retrieve('T').value));
   
   display.display();
   
@@ -107,19 +107,19 @@ void DrawLogo(void) {
 void UploadToPhantoms()
 {
   rssi = radio.get_rssi_last();
-  compressor.download("SNU", sendNum);
-  compressor.download("LAT", gps.Latitude);
-  compressor.download("LON", gps.Longitude);
-  compressor.download("ALT", gps.Altitude);
-  compressor.download("PRE", bmp.Pressure);
-  compressor.download("TEM", bmp.Temperature);
-  compressor.download("AIR", mq9.AirQuality);
-  compressor.download("PM10", sps.PM1_0);
-  compressor.download("PM25", sps.PM2_5);
-  compressor.download("PM40", sps.PM4_0);
-  compressor.download("PM100", sps.PM10_0);
-  compressor.download("HUM", dht.Humidity);
-  compressor.download("BAT", battery.Reading);
+  compressor.download('S', sendNum);
+  compressor.download('L', gps.Latitude);
+  compressor.download('l', gps.Longitude);
+  compressor.download('A', gps.Altitude);
+  compressor.download('P', bmp.Pressure);
+  compressor.download('T', bmp.Temperature);
+  compressor.download('Q', mq9.AirQuality);
+  compressor.download('1', sps.PM1_0);
+  compressor.download('2', sps.PM2_5);
+  compressor.download('4', sps.PM4_0);
+  compressor.download('9', sps.PM10_0);
+  compressor.download('H', dht.Humidity);
+  compressor.download('B', battery.Reading);
 }
 
 

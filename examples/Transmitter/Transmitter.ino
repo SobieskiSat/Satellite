@@ -28,7 +28,6 @@ void setup() {
 
   buzzer.begin(5);
 
-  compressor.begin(MODE_TX);
   compressor.clear();
   logger.begin();
 
@@ -46,7 +45,6 @@ void setup() {
   lastTransmit = millis();
   
   buzzer.play(2);
-  SerialUSB.println("Finished setup!");
 }
 
 void loop() {
@@ -61,24 +59,24 @@ void loop() {
 
   buzzer.update();
 
-  if (radio.tx_fifo_empty())
+  if (radio.timeForTransmit(lastSave, lastTransmit))
   {
 	  delay(30);
       compressor.clear();
 
-      compressor.attach("SNU", sendNum);
-      compressor.attach("LAT", gps.Latitude);
-      compressor.attach("LON",  gps.Longitude);
-      compressor.attach("ALT", gps.Altitude);
-      compressor.attach("PRE", bmp.Pressure);
-      compressor.attach("TEM", bmp.Temperature);
-      compressor.attach("AIR", mq9.AirQuality);
-      compressor.attach("PM10", sps.PM1_0);
-      compressor.attach("PM25", sps.PM2_5);
-      compressor.attach("PM40", sps.PM4_0);
-      compressor.attach("PM100", sps.PM10_0);
-      compressor.attach("HUM", dht.Humidity);
-      compressor.attach("BAT", battery.Level);
+      compressor.attach('S', sendNum);
+      compressor.attach('L', gps.Latitude);
+      compressor.attach('l',  gps.Longitude);
+      compressor.attach('A', gps.Altitude);
+      compressor.attach('P', bmp.Pressure);
+      compressor.attach('T', bmp.Temperature);
+      compressor.attach('Q', mq9.AirQuality);
+      compressor.attach('1', sps.PM1_0);
+      compressor.attach('2', sps.PM2_5);
+      compressor.attach('4', sps.PM4_0);
+      compressor.attach('9', sps.PM10_0);
+      compressor.attach('H', dht.Humidity);
+      compressor.attach('B', battery.Level);
 
       radio.transmit(compressor.getData(), lastTransmit);
       
@@ -87,7 +85,7 @@ void loop() {
 	  delay(30);
   }
 
-  if (millis() - lastSave > 5000)
+  if (logger.timeForSave(lastSave, lastTransmit))
   {
     delay(30);
     logger.save(gps, lastSave);

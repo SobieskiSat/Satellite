@@ -6,20 +6,40 @@
 
 namespace SobieskiSat
 {
-	class DataPacket // change to struct??
+	class DataPacket
 	{
 		public:
 		
-		DataPacket(String name_, float bottom_limit, float upper_limit, int decimals_);
+		DataPacket(char name_, float bottom_limit, float upper_limit, int decimals_)
+		{
+			name = name_;
+			bottomLimit = bottom_limit;
+			upperLimit = upper_limit;
+			decimals = decimals_;
+			/*
+			if (value > upperLimit)
+			{
+				SerialUSB.println(name + " is above range, assigned overflow value.");
+				value = upperLimit - value_ + bottomLimit;
+				//state = State.overflow;
+			}
+			else if (value < bottomLimit)
+			{
+				SerialUSB.println(name + " is below range, assigned overflow value.");
+				value = upperLimit - (bottomLimit - value);
+				//state = State.overflow;
+			}
+			//else state = State.normal;
+			*/
+		};
 		
-		String name;
+		float value;
+		char name;
 		float bottomLimit;
 		float upperLimit;
 		int decimals;
-		float value;
 		
-		String toString();
-		int getBitCount();
+		//enum State { normal, overflow } state;
 	};
 }
 
