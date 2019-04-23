@@ -1,51 +1,26 @@
 #include "Arduino.h"
 #include "Sensor.h"
-#include "../src/config.h"
 
 using namespace SobieskiSat;
 
-Sensor::Sensor()
+bool Sensor::setUpdateDelay(int ms)
 {
-	Status = STA_PREINIT;
-	SDbuffer = "";
-	fileName = "unknown.txt";
-	ID = 'n';
-	newReading = false;
-}
-
-bool Sensor::setUpdateDelay(int ms) // dodać log
-{
-	if (ms == 0)
+	if (minDelay > ms || ms < 0)
 	{
+		//sendLog("usd:" + String(ms), *this); // usd - unsuccesful set delay
 		updateDelay = minDelay;
 		return false;
 	}
-	else if (minDelay > ms || ms < 0)
-	{
-		updateDelay = minDelay;
-		return false;
-	}
-	
 	updateDelay = ms;
+	//sendLog("ssd:" + String(ms), *this); // ssd - succesful set delay
 	return true;
 }
 
 void Sensor::SDbufferClear()
 {
 	SDbuffer = "";
+	//packetReady = false;
 }
-
-bool Sensor::timeForUpdate()
-{
-	return (millis() - lastUpdate > updateDelay && Status == STA_INITIALIZED);
-}
-
-void Sensor::successUpdateFinish()
-{
-	lastUpdate = millis();
-	newReading = true;
-}
-
 /*
 bool Sensor::IsPacketReady()
 {

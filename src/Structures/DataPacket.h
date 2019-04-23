@@ -6,16 +6,19 @@
 
 namespace SobieskiSat
 {
+	
 	class DataPacket
 	{
 		public:
 		
-		DataPacket(char name_, float bottom_limit, float upper_limit, int decimals_)
+		DataPacket(String name_, float bottom_limit, float upper_limit, int numbers_, int decimals_, float value_)
 		{
 			name = name_;
 			bottomLimit = bottom_limit;
 			upperLimit = upper_limit;
+			numbers = numbers_;
 			decimals = decimals_;
+			value = value_;
 			/*
 			if (value > upperLimit)
 			{
@@ -33,11 +36,12 @@ namespace SobieskiSat
 			*/
 		};
 		
-		float value;
-		char name;
+		String name;
 		float bottomLimit;
 		float upperLimit;
+		int numbers;
 		int decimals;
+		float value;
 		
 		//enum State { normal, overflow } state;
 	};

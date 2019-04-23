@@ -7,13 +7,15 @@
 #include <HardwareSerial.h>
 #include "../src/Structures/Clock.h"
 #include "../src/Structures/Time.h"
+#include "../src/Components/Logger.h"
+#include "../src/SobieskiSat.h"
 #include "Sps30/sensirion_arch_config.h"
 #include "Sps30/sps30.h"
-#include <SparkFunMPU9250-DMP.h>
-#include "../src/config.h"
+//#include <SparkFunMPU9250-DMP.h>
 
 namespace SobieskiSat
 {
+
 	class BMP280 : public Sensor
 	{
 		public:
@@ -26,6 +28,7 @@ namespace SobieskiSat
 		bool begin();
 		bool update();
 		String listReadings();
+		//static bool (*Sensor::sendLog)(String message, Sensor& sender);
 		
 		private:
 		
@@ -60,6 +63,8 @@ namespace SobieskiSat
 		private:
 		
 		long levelTimeout = 5000000; // 500ms
+		int pin = 3;
+		
 		int sample(byte data[40]);
 		long levelTime(byte level, int firstWait = 10, int interval = 6);
 		byte bits2byte(byte data[8]);
@@ -112,16 +117,17 @@ namespace SobieskiSat
 		
 	};
 	
-	class MQ9 : public Sensor
+	class BAT : public Sensor
 	{
 		public:
-		MQ9();
+		BAT();
 		
-		float AirQuality;
+		float Reading;
 		
 		bool begin();
 		bool update();
 		String listReadings();
+		float getLevel();
 	};
 	
 	class PHR : public Sensor
@@ -136,20 +142,18 @@ namespace SobieskiSat
 		String listReadings();
 	};
 	
-	class BAT : public Sensor
+	class MQ9 : public Sensor
 	{
 		public:
-		BAT();
+		MQ9();
 		
-		float Reading;
-		float Level;
+		float AirQuality;
 		
 		bool begin();
 		bool update();
 		String listReadings();
-		float getLevel();
 	};
-	
+	/*
 	class MPU : public Sensor
 	{
 		public:
@@ -169,30 +173,30 @@ namespace SobieskiSat
 		MPU9250_DMP imu;
 		
 	};
+	*/
 	
-	
-	#define BMP280_ADDR 0x76
-	#define	BMP280_REG_CONTROL 0xF4
-	#define	BMP280_REG_RESULT_PRESSURE 0xF7
-	#define BMP280_REG_RESULT_TEMPRERATURE 0xFA
-	#define	BMP280_COMMAND_TEMPERATURE 0x2E
-	#define	BMP280_COMMAND_PRESSURE0 0x25  			 
-	#define	BMP280_COMMAND_PRESSURE1 0x29  			
-	#define	BMP280_COMMAND_PRESSURE2 0x2D    
-	#define	BMP280_COMMAND_PRESSURE3 0x31    
-	#define	BMP280_COMMAND_PRESSURE4 0x5D    
-	#define	BMP280_COMMAND_OVERSAMPLING_MAX 0xF5
+#define BMP280_ADDR 0x76
+#define	BMP280_REG_CONTROL 0xF4
+#define	BMP280_REG_RESULT_PRESSURE 0xF7
+#define BMP280_REG_RESULT_TEMPRERATURE 0xFA
+#define	BMP280_COMMAND_TEMPERATURE 0x2E
+#define	BMP280_COMMAND_PRESSURE0 0x25  			 
+#define	BMP280_COMMAND_PRESSURE1 0x29  			
+#define	BMP280_COMMAND_PRESSURE2 0x2D    
+#define	BMP280_COMMAND_PRESSURE3 0x31    
+#define	BMP280_COMMAND_PRESSURE4 0x5D    
+#define	BMP280_COMMAND_OVERSAMPLING_MAX 0xF5
 
-	#define simpleDHTCombileError(t, err) ((t << 8) & 0xff00) | (err & 0x00ff)
-	#define SimpleDHTErrSuccess 0
-	#define SimpleDHTErrStartLow 0x10
-	#define SimpleDHTErrStartHigh 0x11
-	#define SimpleDHTErrDataLow 0x12
-	#define SimpleDHTErrDataRead 0x13
-	#define SimpleDHTErrDataEOF 0x14
-	#define SimpleDHTErrDataChecksum 0x15
-	#define SimpleDHTErrZeroSamples 0x16
-	#define SimpleDHTErrNoPin 0x17
+#define simpleDHTCombileError(t, err) ((t << 8) & 0xff00) | (err & 0x00ff)
+#define SimpleDHTErrSuccess 0
+#define SimpleDHTErrStartLow 0x10
+#define SimpleDHTErrStartHigh 0x11
+#define SimpleDHTErrDataLow 0x12
+#define SimpleDHTErrDataRead 0x13
+#define SimpleDHTErrDataEOF 0x14
+#define SimpleDHTErrDataChecksum 0x15
+#define SimpleDHTErrZeroSamples 0x16
+#define SimpleDHTErrNoPin 0x17
 };
 
 #endif

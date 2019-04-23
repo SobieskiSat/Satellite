@@ -1,41 +1,39 @@
-#include "Arduino.h"
 #include "Sensors.h"
 #include "Sensor.h"
-//#include <cmath>
-#include "../src/config.h"
-
+#include <Wire.h>
+#include <stdio.h>
+#include <math.h>
+#include "Arduino.h"
+#include "../src/SobieskiSat.h"
 
 using namespace SobieskiSat;
 
-PHR::PHR() : Sensor() { ID = 'M'; }
-		
+PHR::PHR() { ID = 'L'; }
+
 bool PHR::begin()
 {
-	Status = STA_DURINGINIT;
-	fileName = "PHR.txt";
-	minDelay = 0;
-	setUpdateDelay(UPD_PHR);
-	pinMode(PIN_PHR, INPUT);
-	
-	// dodać procedurę testu czujnika
-	Status = STA_INITIALIZED;
-	
-	return (Status == STA_INITIALIZED);
+	Initialized = false;
+	minDelay = 30;
+	updateDelay = minDelay;
+	fileName = "photo.txt";
+	Initialized = true;
+	return true;
 }
-		
+
 bool PHR::update()
 {
-	if (timeForUpdate())
+	if (millis() - lastUpdate > updateDelay && Initialized)
 	{
-		Light = analogRead(PIN_PHR);
+		Light = (float)analogRead(A1);
 		
-		successUpdateFinish();
+		SDbuffer += String(Light) + "\r\n";
+		lastUpdate = millis();
 		return true;
 	}
-	else return false;
+	return false;
 }
-		
+
 String PHR::listReadings()
 {
-	return "LightIntensity: " + String(Light, 0);
+	return "Light intensity: " + String(Light);
 }

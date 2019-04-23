@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 #include "DataPacket.h"
-#include "../src/config.h"
+#include "../src/Sensors/Sensor.h"
 
 namespace SobieskiSat
 {
@@ -12,20 +12,20 @@ namespace SobieskiSat
 		public:
 		
 		void clear();
-		void attach(char name, float value);
-		DataPacket retrieve(char name);
-		void download(char name, float& variable);
-		void push(int length, char* data_);
-		String getData();
+		void attach(DataPacket packet);
+		DataPacket retrieve(String name);
 		
-		char data[COMPR_BUFFSIZE];
-		int currentBit = 0;
+		int packetSize = 64;
+		char data[64];
+		bool generateFormat = false;
+		String format = "";
+		// index of last bit in data
+		int index = 0;
 		
 		private:
 		
-		DataPacket find(char name, int &startBit, int &endBit);
-		DataPacket getDataPacket(char name);
-		int receivedLenght = 0;
+		DataPacket find(String name, int &startBit, int &endBit);
+		
 		
 	};
 }

@@ -11,9 +11,11 @@
 #include "Arduino.h"
 #include "Structures/Compressor.h"
 #include "Music/Player.h"
-#include "config.h"
 
 namespace SobieskiSat {
+	
+	//Logger logger;
+	//static Logger* logger();
 };
 
 #endif

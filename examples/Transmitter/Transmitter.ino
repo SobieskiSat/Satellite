@@ -4,96 +4,109 @@
 
 using namespace SobieskiSat;
 
+//Radio radio(10, 12, 433.0, Bandwidth_500000_Hz, SpreadingFactor_7, CodingRate_4_8);
 Radio radio(10, 12, 433.8, Bandwidth_125000_Hz, SpreadingFactor_9, CodingRate_4_8);
-Compressor compressor;
-Logger logger;
 
-float sendNum = 0;  // numer wysłanego pakietu
-GPS gps;            
+Logger logger;
+GPS gps;
 BMP280 bmp;
 SPS30 sps;
-MQ9 mq9;            // (analog)
 DHT22 dht;
-PHR photo;
 BAT battery;
+PHR photo;
+MQ9 mq9;
 
+Compressor compressor;
 Player buzzer;
-bool state = false;
+
 long lastSave;
-long lastTransmit;
+long beepTimer;
+bool state;
+float sendNum = 0;
+bool generated = false;
 
 void setup() {
   SerialUSB.begin(115200);
-  pinMode(PIN_LED, OUTPUT);
+
+  pinMode(13, OUTPUT);
 
   buzzer.begin(5);
 
   compressor.clear();
-  logger.begin();
 
-  gps.begin();
+  logger.begin();
+  
   bmp.begin();
+  gps.begin();
   sps.begin();
   dht.begin();
-  mq9.begin();
   battery.begin();
+  mq9.begin();
   photo.begin();
   
   radio.begin();
-
-  lastSave = millis() + 10;
-  lastTransmit = millis();
   
+  delay(1000);
+
   buzzer.play(2);
+  lastSave = millis();
 }
 
 void loop() {
-
+  
   gps.update();
   bmp.update();
   sps.update();
   dht.update();
-  mq9.update();
   battery.update();
+  mq9.update();
   photo.update();
 
-  buzzer.update();
-
-  if (radio.timeForTransmit(lastSave, lastTransmit))
-  {
-	  delay(30);
+  if (radio.tx_fifo_empty())
+  { 
+      SerialUSB.println("Radio sending");
+      if (!generated) {generated = true; compressor.generateFormat = true; }
       compressor.clear();
-
-      compressor.attach('S', sendNum);
-      compressor.attach('L', gps.Latitude);
-      compressor.attach('l',  gps.Longitude);
-      compressor.attach('A', gps.Altitude);
-      compressor.attach('P', bmp.Pressure);
-      compressor.attach('T', bmp.Temperature);
-      compressor.attach('Q', mq9.AirQuality);
-      compressor.attach('2', sps.PM2_5);
-      compressor.attach('9', sps.PM10_0);
-      compressor.attach('H', dht.Humidity);
-      compressor.attach('B', battery.Level);
-
-      radio.transmit(compressor.getData(), lastTransmit);
+      compressor.attach(DataPacket("SendNum", 0, 255, 0, 0, sendNum));
+      compressor.attach(DataPacket("Latitude", 49, 54.5, 2, 7, gps.Latitude));
+      compressor.attach(DataPacket("Longitude",  14.07, 24.09, 2, 7, gps.Longitude));
+      compressor.attach(DataPacket("Altitude", 0, 1000, 4, 1, gps.Altitude));
+      compressor.attach(DataPacket("Pressure", 600, 1200, 4, 4, bmp.Pressure));
+      compressor.attach(DataPacket("Temperature", -20, 50, 2, 2, bmp.Temperature));
+      compressor.attach(DataPacket("AirQuality", 0, 1024, 4, 1, mq9.AirQuality));
+      compressor.attach(DataPacket("PM25", 0, 100, 3, 1, sps.PM2_5));
+      compressor.attach(DataPacket("PM100", 0, 100, 3, 1, sps.PM10_0));
+      compressor.attach(DataPacket("Humidity", 0, 100, 3, 1, dht.Humidity));
+      compressor.attach(DataPacket("Battery", 0, 1024, 4, 0, battery.Reading));
+      compressor.generateFormat = false;
+      Frame frame;
+      SerialUSB.println(compressor.format);
+      frame.print(compressor.data);
+      radio.transmit(frame);
+      sendNum++;
       
-      digitalWrite(PIN_LED, state);
+      digitalWrite(13, state);
       state = !state;
-	  delay(30);
   }
 
-  if (logger.timeForSave(lastSave, lastTransmit))
+  if (millis() - lastSave > 5000)
   {
-    delay(30);
-    logger.save(gps, lastSave);
-    logger.save(bmp, lastSave);
-    logger.save(mq9, lastSave);
-    logger.save(sps, lastSave);
-    logger.save(dht, lastSave);
-    logger.save(battery, lastSave);
-    logger.save(photo, lastSave);
-    logger.saveBuffer(lastSave);
-	delay(30);
+    delay(10);
+    SerialUSB.println("SD saving");
+    logger.save(gps);
+    logger.save(bmp);
+    logger.save(sps);
+    logger.save(dht);
+    logger.saveBuffer();
+    lastSave = millis();
+    delay(10);
+
+    tone(5, 540, 40);
+  }
+  
+  if (millis() - beepTimer > 100000)
+  {
+    beepTimer = millis();
+    tone(5, 600, 750);
   }
 }

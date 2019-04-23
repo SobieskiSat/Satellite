@@ -4,20 +4,19 @@
 #include <stdio.h>
 #include <math.h>
 #include "Arduino.h"
-#include "../src/config.h"
-#include "../src/utilities.h"
+#include "../src/SobieskiSat.h"
 
 using namespace SobieskiSat;
 
-BMP280::BMP280() : Sensor() { ID = 'B'; }
+BMP280::BMP280() { ID = 'B'; }
 
 bool BMP280::begin()
 {
-	Status = STA_DURINGINIT;
+	Initialized = false;
+	Wire.begin();
 	fileName = "BMP280.txt";
 	oversampling = 4;
 	
-	Wire.begin();
 	if (readUInt(0x88, dig_T1) &&
 		readInt(0x8A, dig_T2)  &&
 		readInt(0x8C, dig_T3)  &&
@@ -32,18 +31,18 @@ bool BMP280::begin()
 		readInt(0x9E, dig_P9))
 	{
 		startMeasurment();
-		setUpdateDelay(UPD_BMP);
+		updateDelay = minDelay;
+		packetSize = 10;
 		
-		Status = STA_INITIALIZED; // dodać procedurę testu i kalibracji
-		//LogMessage("Success");
+		Initialized = true;
 	}
-	
-	return (Status == STA_INITIALIZED);
+	//logger.addToBuffer("[" + String(ID) + "] I " + (Initialized == true ? "1" : "0") + " @" + millis() + "\r\n");
+	return Initialized;
 }
 
 bool BMP280::update()
 {
-	if (timeForUpdate())
+	if (millis() - lastUpdate > updateDelay && Initialized)
 	{
 		startMeasurment();
 		double uP, uT;
@@ -76,10 +75,12 @@ bool BMP280::update()
 			Pressure = (float)dPressure;
 			Altitude = 44330 * (1.0 - pow(Pressure / 1013.25, 0.1903));
 			
-			SDbuffer += String(Pressure, PREC_PRE) + " " + String(Temperature, PREC_TEM) + " @" + String(millis());
-			SDbuffer += "\r\n";
-				
-			successUpdateFinish();
+				SDbuffer += String(Pressure, 7) + " " + String(Temperature, 7) + " @" + String(millis());
+				SDbuffer += "\r\n";
+			lastUpdate = millis();
+			
+			//(*Sensor::sendLog)(listReadings(), *this);
+			
 			return true;
 		}
 	}
@@ -88,7 +89,7 @@ bool BMP280::update()
 
 String BMP280::listReadings()
 {
-	return "Pressure: " + String(Pressure, PREC_PRE) + " Temperature: " + String(Temperature, PREC_TEM);
+	return "Pressure: " + String(Pressure, 3) + " Temperature: " + String(Temperature, 3);
 }
 
 bool BMP280::startMeasurment()

@@ -1,41 +1,39 @@
-#include "Arduino.h"
 #include "Sensors.h"
 #include "Sensor.h"
-//#include <cmath>
-#include "../src/config.h"
-
+#include <Wire.h>
+#include <stdio.h>
+#include <math.h>
+#include "Arduino.h"
+#include "../src/SobieskiSat.h"
 
 using namespace SobieskiSat;
 
-MQ9::MQ9() : Sensor() { ID = 'M'; }
-		
+MQ9::MQ9() { ID = 'L'; }
+
 bool MQ9::begin()
 {
-	Status = STA_DURINGINIT;
-	fileName = "MQ9.txt";
-	minDelay = 0;
-	setUpdateDelay(UPD_MQ9);
-	pinMode(PIN_MQ9, INPUT);
-	
-	// dodać procedurę testu czujnika
-	Status = STA_INITIALIZED;
-	
-	return (Status == STA_INITIALIZED);
+	Initialized = false;
+	minDelay = 30;
+	updateDelay = minDelay;
+	fileName = "mq9.txt";
+	Initialized = true;
+	return true;
 }
-		
+
 bool MQ9::update()
 {
-	if (timeForUpdate())
+	if (millis() - lastUpdate > updateDelay && Initialized)
 	{
-		AirQuality = analogRead(PIN_MQ9);
+		AirQuality = (float)analogRead(A0);
 		
-		successUpdateFinish();
+		SDbuffer += String(AirQuality) + "\r\n";
+		lastUpdate = millis();
 		return true;
 	}
-	else return false;
+	return false;
 }
-		
+
 String MQ9::listReadings()
 {
-	return "AirQuality: " + String(AirQuality, 0);
+	return "Air quality: " + String(AirQuality);
 }

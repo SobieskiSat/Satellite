@@ -1,41 +1,36 @@
-#include "Arduino.h"
 #include "Sensors.h"
 #include "Sensor.h"
-//#include <cmath>
-#include "../src/config.h"
-
+#include <Wire.h>
+#include <stdio.h>
+#include <math.h>
+#include "Arduino.h"
+#include "../src/SobieskiSat.h"
 
 using namespace SobieskiSat;
 
-BAT::BAT() : Sensor() { ID = 'b'; }
-		
+BAT::BAT() { ID = 'b'; }
+
 bool BAT::begin()
 {
-	Status = STA_DURINGINIT;
-	fileName = "BAT.txt";
-	minDelay = 0;
-	setUpdateDelay(UPD_BAT);
-	pinMode(PIN_BAT, INPUT);
-	
-	Status = STA_INITIALIZED;
-	return (Status == STA_INITIALIZED);
+	Initialized = false;
+	minDelay = 30;
+	updateDelay = minDelay;
+	fileName = "battery.txt";
+	Initialized = true;
+	return true;
 }
-		
+
 bool BAT::update()
 {
-	if (timeForUpdate())
+	if (millis() - lastUpdate > updateDelay && Initialized)
 	{
-		Reading = analogRead(PIN_BAT);
+		Reading = (float)analogRead(A2);
 		
-		successUpdateFinish();
+		SDbuffer += String(Reading) + "\r\n";
+		lastUpdate = millis();
 		return true;
 	}
-	else return false;
-}
-		
-String BAT::listReadings()
-{
-	return "BatteryLevel: " + String(getLevel(), 0);
+	return false;
 }
 
 float BAT::getLevel()
@@ -43,4 +38,7 @@ float BAT::getLevel()
 	return Reading;
 }
 
-
+String BAT::listReadings()
+{
+	return "Battery level: " + String(getLevel());
+}
