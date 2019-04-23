@@ -5,8 +5,6 @@
 #include "../src/Sensors/Sensor.h"
 #include "../src/Structures/Clock.h"
 #include "../src/Structures/Time.h"
-#include "../src/config.h"
-#include "../src/utilities.h"
 
 namespace SobieskiSat
 {
@@ -14,22 +12,23 @@ namespace SobieskiSat
 	{
 		public:
 		
-		int Status;
+		bool Initialized = false;
 		bool printUSB = true;
 		
 		bool begin();
-		bool save(Sensor& sensor, long& lastSave);
-		bool saveBuffer(long& lastSave);
-		bool timeForSave(long& lastSave, long& lastTransmit);
+		bool save(Sensor& sensor);
+		bool saveBuffer();
+		void addToBuffer(String str, bool onlyUSB = false);
+		bool logSensor(String message, Sensor& sender);
+		bool timeForSave(long lastSave, long lastTransmit);
 		
 		private:
 		
 		String rootDir;
 		String buffer;
-		static void logMessage(const String msg);
-		void pushToBuffer(String str);
-		bool isInitialized();
 	};
+	
+	#define SD_pin 11
 };
 
 #endif

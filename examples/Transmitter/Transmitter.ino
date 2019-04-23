@@ -5,8 +5,6 @@
 using namespace SobieskiSat;
 
 Radio radio(10, 12, 433.8, Bandwidth_125000_Hz, SpreadingFactor_9, CodingRate_4_8);
-Compressor compressor;
-Logger logger;
 
 float sendNum = 0;  // numer wysłanego pakietu
 GPS gps;            
@@ -17,20 +15,21 @@ DHT22 dht;
 PHR photo;
 BAT battery;
 
-Player buzzer;
 bool state = false;
 long lastSave;
 long lastTransmit;
+
+Compressor compressor;
+Logger logger;
+DataPacket current('I', 0, 0, 0, 0);
 
 void setup() {
   SerialUSB.begin(115200);
   pinMode(PIN_LED, OUTPUT);
 
-  buzzer.begin(5);
-
   compressor.clear();
   logger.begin();
-
+  
   gps.begin();
   bmp.begin();
   sps.begin();
@@ -38,17 +37,17 @@ void setup() {
   mq9.begin();
   battery.begin();
   photo.begin();
-  
+
   radio.begin();
+  
+  delay(1000);
 
   lastSave = millis() + 10;
   lastTransmit = millis();
-  
-  buzzer.play(2);
 }
 
 void loop() {
-
+  
   gps.update();
   bmp.update();
   sps.update();
@@ -57,43 +56,66 @@ void loop() {
   battery.update();
   photo.update();
 
-  buzzer.update();
-
   if (radio.timeForTransmit(lastSave, lastTransmit))
   {
-	  delay(30);
       compressor.clear();
 
-      compressor.attach('S', sendNum);
-      compressor.attach('L', gps.Latitude);
-      compressor.attach('l',  gps.Longitude);
-      compressor.attach('A', gps.Altitude);
-      compressor.attach('P', bmp.Pressure);
-      compressor.attach('T', bmp.Temperature);
-      compressor.attach('Q', mq9.AirQuality);
-      compressor.attach('2', sps.PM2_5);
-      compressor.attach('9', sps.PM10_0);
-      compressor.attach('H', dht.Humidity);
-      compressor.attach('B', battery.Level);
+      current = DAT_SNU;
+      current.value = sendNum;
+      compressor.attach(current);
+      current = DAT_LAT;
+      current.value = gps.Latitude;
+      compressor.attach(current);
+      current = DAT_LAT;
+      current.value = gps.Latitude;
+      compressor.attach(current);
+      current = DAT_LON;
+      current.value = gps.Longitude;
+      compressor.attach(current);
+      current = DAT_ALT;
+      current.value = gps.Altitude;
+      compressor.attach(current);
+      current = DAT_PRE;
+      current.value = bmp.Pressure;
+      compressor.attach(current);
+      current = DAT_TEM;
+      current.value = bmp.Temperature;
+      compressor.attach(current);
+      current = DAT_AIR;
+      current.value = mq9.AirQuality;
+      compressor.attach(current);
+      current = DAT_PM25;
+      current.value = sps.PM2_5;
+      compressor.attach(current);
+      current = DAT_PM100;
+      current.value = sps.PM10_0;
+      compressor.attach(current);
+      current = DAT_HUM;
+      current.value = dht.Humidity;
+      compressor.attach(current);
+      current = DAT_BAT;
+      current.value = battery.getLevel();
+      compressor.attach(current);
 
-      radio.transmit(compressor.getData(), lastTransmit);
+      Frame frame;
+      frame.print(compressor.data);
+      radio.transmit(frame);
       
-      digitalWrite(PIN_LED, state);
+      digitalWrite(13, state);
       state = !state;
-	  delay(30);
+      lastTransmit = millis();
   }
 
   if (logger.timeForSave(lastSave, lastTransmit))
   {
-    delay(30);
-    logger.save(gps, lastSave);
-    logger.save(bmp, lastSave);
-    logger.save(mq9, lastSave);
-    logger.save(sps, lastSave);
-    logger.save(dht, lastSave);
-    logger.save(battery, lastSave);
-    logger.save(photo, lastSave);
-    logger.saveBuffer(lastSave);
-	delay(30);
+    logger.save(gps);
+    logger.save(bmp);
+    logger.save(mq9);
+    logger.save(sps);
+    logger.save(dht);
+    logger.save(battery);
+    logger.save(photo);
+    logger.saveBuffer();
+    lastSave = millis();
   }
 }

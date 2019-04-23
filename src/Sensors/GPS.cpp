@@ -4,15 +4,15 @@
 #include <HardwareSerial.h>
 #include "../src/Structures/Clock.h"
 #include "../src/Structures/Time.h"
+#include "../src/SobieskiSat.h"
 #include "../src/config.h"
 
 using namespace SobieskiSat;
 
-GPS::GPS() : gps(&Serial1), Sensor()  { ID = 'G'; }
+GPS::GPS() : gps(&Serial1) { ID = 'G'; }
 
 bool GPS::begin()
 {
-	Status = STA_DURINGINIT;
 	fileName = "GPS.txt";
 	minDelay = 0;
 	setUpdateDelay(UPD_GPS);
@@ -25,14 +25,12 @@ bool GPS::begin()
 	delay(1000);
 	
 	Serial1.println(PMTK_Q_RELEASE);
-	
-	// dodać procedurę testu i kalibracji
-	
 	return true;
 }
 
 bool GPS::update()
 {
+	
 	char c = gps.read();
 	if (gps.newNMEAreceived())
 	{
@@ -47,29 +45,24 @@ bool GPS::update()
 			HardwareClock.update();
 			updateRecievedDate();
 			
-			SDbuffer += LastNMEA;
+			SDbuffer += String(Latitude, 7) + " " + String(Longitude, 7) + " " + String(Altitude, 7) + " " + RecievedDate.getString() + " @" + String(millis());
 			SDbuffer += "\r\n";
-			SDbuffer += String(Latitude, PREC_LAT) + " " + String(Longitude, PREC_LON) + " " + String(Altitude, PREC_ALT) + " " + RecievedDate.getString() + " @" + String(millis());
-			SDbuffer += "\r\n";
-					
-			successUpdateFinish();
+			
 			return true;
 		}
 	}
 	
-	if ((Status == STA_DURINGINIT) && gps.fix)
+	if (!Initialized && gps.fix /*&& gpsAnyZero()*/)
 	{
 		HardwareClock.begin(RecievedDate);
 		updateRecievedDate();
+		
+		Initialized = true;
 		
 		Latitude = gps.latitudeDegrees;
 		Longitude = gps.longitudeDegrees;
 		Altitude = gps.altitude;
 		LastNMEA = gps.lastNMEA();
-		
-		// procedura testu i kalibracji - gpsAnyZero
-		Status = STA_INITIALIZED;
-		
 		return true;
 	}
 	return false;
@@ -77,7 +70,7 @@ bool GPS::update()
 
 String GPS::listReadings()
 {
-	return "Latitude: " + String(Latitude, PREC_LAT) + " Longitude: " + String(Longitude, PREC_LON) + " Altitude: " + String(Altitude, PREC_ALT);
+	return "Latitude: " + String(Latitude, 7) + " Longitude: " + String(Longitude, 7) + " Altitude: " + String(Altitude, 2);
 }
 
 bool GPS::gpsAnyZero()

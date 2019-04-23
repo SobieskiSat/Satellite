@@ -2,17 +2,18 @@
 #define CONFIG_H
 
 #include "Structures/DataPacket.h"
-using namespace SobieskiSat;
+namespace SobieskiSat
+{
 
-#define COMPR_FORMAT "0_8_S_0_128_0 8_24_L_49.0_52.0_7 24_40_l_14.07_24.09_7 40_56_A_0_6553_1 56_71_P_600_1100_4 71_84_T_-10.00_50.00_2 84_97_Q_0_4096_0 97_118_2_0.0_102.4_1 118_129_9_0.0_102.4_1 129_139_H_0.0_100.0_1 139_152_B_0_4096_0"
+#define COMPR_FORMAT "0_8_S_0_128_0 8_24_L_49.0_52.0_7 24_40_l_14.07_24.09_7 40_56_A_0_6553_1 56_69_P_600_1100_5 69_84_T_-10.00_50.00_2 84_97_Q_0_4096_0 97_108_1_0.0_102.4_1 108_119_2_0.0_102.4_1 119_130_4_0.0_102.4_1 130_141_9_0.0_102.4_1 141_151_H_0.0_100.0_1 151_164_B_0_4096_0"
 #define COMPR_FORMLENGHT 259
 #define COMPR_BUFFSIZE 21
-#define COMPR_NAMECHAIN "S L l A P T Q 2 9 H B"
+#define COMPR_NAMECHAIN "S L l A P T Q 1 2 4 9 H B"
 
 // piny komponentów
 #define PIN_MQ9 A0
-#define PIN_BAT A4
-#define PIN_PHR A2
+#define PIN_BAT A2
+#define PIN_PHR A1
 #define PIN_LED 13
 #define PIN_DHT 3
 #define PIN_SD 11
@@ -33,28 +34,28 @@ using namespace SobieskiSat;
 #define PREC_MPU 7
 
 // minimalne przewidywane odczyty (sensory wysyłane przez radio)
-#define MIN_SNU 0.0f
-#define MIN_LAT 49.0f
-#define MIN_LON 14.07f
-#define MIN_ALT 0.0f
-#define MIN_PRE 600.0f
-#define MIN_TEM -10.0f
-#define MIN_AIR 0.0f
-#define MIN_SPS 0.0f
-#define MIN_HUM 0.0f
-#define MIN_BAT 0.0f
+#define MIN_SNU 0.0
+#define MIN_LAT 49.0
+#define MIN_LON 14.07
+#define MIN_ALT 0.0
+#define MIN_PRE 600.0
+#define MIN_TEM -10.0
+#define MIN_AIR 0.0
+#define MIN_SPS 0.0
+#define MIN_HUM 0.0
+#define MIN_BAT 0.0
 	
 // maksymalne przewidywane odczyty (sensory wysyłane przez radio)
-#define MAX_SNU 255.0f
-#define MAX_LAT 52.0f
-#define MAX_LON 24.09f
-#define MAX_ALT 6553.0f
-#define MAX_PRE 1100.0f
-#define MAX_TEM 50.0f
-#define MAX_AIR 4096.0f
-#define MAX_SPS 102.4f
-#define MAX_HUM 100.0f
-#define MAX_BAT 4096.0f
+#define MAX_SNU 128.0
+#define MAX_LAT 52.0
+#define MAX_LON 24.09
+#define MAX_ALT 6553.0
+#define MAX_PRE 1100.0
+#define MAX_TEM 50.0
+#define MAX_AIR 4096.0
+#define MAX_SPS 102.4
+#define MAX_HUM 100.0
+#define MAX_BAT 4096.0
 	
 // czas między pomiarami, 0 oznacza najmniejszy możliwy
 #define UPD_GPS 0
@@ -89,17 +90,19 @@ using namespace SobieskiSat;
 #define MODE_TX 0
 #define MODE_RX 1
 
-static DataPacket DAT_SNU('S', MIN_SNU, MAX_SNU, 0);
-static DataPacket DAT_LAT('L', MIN_LAT, MAX_LAT, PREC_LAT);
-static DataPacket DAT_LON('l', MIN_LON, MAX_LON, PREC_LON);
-static DataPacket DAT_ALT('A', MIN_ALT, MAX_ALT, PREC_ALT);
-static DataPacket DAT_PRE('P', MIN_PRE, MAX_PRE, PREC_PRE);
-static DataPacket DAT_TEM('T', MIN_TEM, MAX_TEM, PREC_TEM);
-static DataPacket DAT_AIR('Q', MIN_AIR, MAX_AIR, 0);
-static DataPacket DAT_SPS('2', MIN_SPS, MAX_SPS, PREC_SPS);
-static DataPacket DAT_SPS('9', MIN_SPS, MAX_SPS, PREC_SPS);
-static DataPacket DAT_HUM('H', MIN_HUM, MAX_HUM, PREC_HUM);
-static DataPacket DAT_BAT('B', MIN_BAT, MAX_BAT, 0);
+#define NAMECHAIN "S L l A P T Q 1 2 4 9 H B"
+
+static DataPacket DAT_SNU('S', MIN_SNU, MAX_SNU, 0, 0);
+static DataPacket DAT_LAT('L', MIN_LAT, MAX_LAT, PREC_LAT, 0);
+static DataPacket DAT_LON('l', MIN_LON, MAX_LON, PREC_LON, 0);
+static DataPacket DAT_ALT('A', MIN_ALT, MAX_ALT, PREC_ALT, 0);
+static DataPacket DAT_PRE('P', MIN_PRE, MAX_PRE, PREC_PRE, 0);
+static DataPacket DAT_TEM('T', MIN_TEM, MAX_TEM, PREC_TEM, 0);
+static DataPacket DAT_AIR('Q', MIN_AIR, MAX_AIR, 0, 0);
+static DataPacket DAT_PM25('2', MIN_SPS, MAX_SPS, PREC_SPS, 0);
+static DataPacket DAT_PM100('9', MIN_SPS, MAX_SPS, PREC_SPS, 0);
+static DataPacket DAT_HUM('H', MIN_HUM, MAX_HUM, PREC_HUM, 0);
+static DataPacket DAT_BAT('B', MIN_BAT, MAX_BAT, 0, 0);
 
 /*
 enum class SensorStatus
@@ -113,5 +116,6 @@ enum class SensorStatus
 	Phantom = 6
 };
 */
+};
 	
 #endif

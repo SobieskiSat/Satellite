@@ -1,31 +1,35 @@
 #include "Sensors.h"
 #include "Arduino.h"
+#include "../src/SobieskiSat.h"
 #include "../src/Components/Logger.h"
 #include "../src/config.h"
+
+#define DHT22_pin 3
 
 //extern Logger logger;
 
 using namespace SobieskiSat;
 
-DHT22::DHT22() : Sensor() { ID = 'D'; }
+DHT22::DHT22() { ID = 'D'; }
 
 bool DHT22::begin()
 {
-	Status = STA_DURINGINIT;
 	fileName = "DHT22.txt";
 	minDelay = 2000;
-	lastUpdate = millis() + DEL_DHT;
 	setUpdateDelay(UPD_DHT);
 	
-	// procedura testu i kalibracji
-	Status = STA_INITIALIZED;
+	Initialized = true;
+	delay(DEL_DHT);
+	Initialized = update();
 	
-	return (Status == STA_INITIALIZED);
+	lastUpdate =  millis() + 3000;
+	
+	return Initialized;
 }
 
 bool DHT22::update()
 {
-	if (timeForUpdate())
+	if (millis() - lastUpdate > updateDelay && Initialized)
 	{
 		byte data[40] = {0};
 		if (sample(data) != SimpleDHTErrSuccess) return false;
@@ -37,10 +41,10 @@ bool DHT22::update()
 		Temperature = (float)((temperature & 0x8000 ? -1 : 1) * (temperature & 0x7FFF)) / 10.0;
 		Humidity = (float)humidity / 10.0;
 
-		SDbuffer += String(Humidity, PREC_HUM) + " " + String(Temperature, PREC_TEM) + " @" + String(millis());
+		SDbuffer += String(Humidity, 1) + " " + String(Temperature, 1) + " @" + String(millis());
 		SDbuffer += "\r\n";
 		
-		successUpdateFinish();
+		lastUpdate = millis();
 		return true;
 	}
 	
@@ -49,7 +53,7 @@ bool DHT22::update()
 
 String DHT22::listReadings()
 {
-	return "Humidity: " + String(Humidity, PREC_HUM) + " Temperature: " + String(Temperature, PREC_TEM);
+	return "Humidity: " + String(Humidity, 1) + " Temperature: " + String(Temperature, 1);
 }
 
 long DHT22::levelTime(byte level, int firstWait, int interval)
@@ -125,7 +129,7 @@ int DHT22::sample(byte data[40]) {
     //    1. T(be), PULL LOW 1ms(0.8-20ms).
     //    2. T(go), PULL HIGH 30us(20-200us), use 40us.
     //    3. SET TO INPUT.
-    pinMode(PIN_DHT, OUTPUT);
+    pinMode(PIN_DHT	, OUTPUT);
     digitalWrite(PIN_DHT, LOW);
     delayMicroseconds(1000);
     // Pull high and set to input, before wait 40us.

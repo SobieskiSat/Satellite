@@ -11,23 +11,22 @@ BAT::BAT() : Sensor() { ID = 'b'; }
 		
 bool BAT::begin()
 {
-	Status = STA_DURINGINIT;
 	fileName = "BAT.txt";
 	minDelay = 0;
 	setUpdateDelay(UPD_BAT);
 	pinMode(PIN_BAT, INPUT);
-	
-	Status = STA_INITIALIZED;
-	return (Status == STA_INITIALIZED);
+	Initialized = true;
+	return true;
 }
 		
 bool BAT::update()
 {
-	if (timeForUpdate())
+	if (millis() - lastUpdate > updateDelay && Initialized)
 	{
 		Reading = analogRead(PIN_BAT);
 		
-		successUpdateFinish();
+		SDbuffer += String(getLevel());
+		lastUpdate = millis();
 		return true;
 	}
 	else return false;

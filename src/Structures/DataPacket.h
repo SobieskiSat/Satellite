@@ -6,16 +6,18 @@
 
 namespace SobieskiSat
 {
+	
 	class DataPacket
 	{
 		public:
 		
-		DataPacket(char name_, float bottom_limit, float upper_limit, int decimals_)
+		DataPacket(char name_, float bottom_limit, float upper_limit, int decimals_, float value_)
 		{
 			name = name_;
 			bottomLimit = bottom_limit;
 			upperLimit = upper_limit;
 			decimals = decimals_;
+			value = value_;
 			/*
 			if (value > upperLimit)
 			{
@@ -33,11 +35,11 @@ namespace SobieskiSat
 			*/
 		};
 		
-		float value;
 		char name;
 		float bottomLimit;
 		float upperLimit;
 		int decimals;
+		float value;
 		
 		//enum State { normal, overflow } state;
 	};

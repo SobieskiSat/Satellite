@@ -1,7 +1,6 @@
 #include "Arduino.h"
 #include "Sensors.h"
 #include "Sensor.h"
-//#include <cmath>
 #include "../src/config.h"
 
 
@@ -11,25 +10,25 @@ MQ9::MQ9() : Sensor() { ID = 'M'; }
 		
 bool MQ9::begin()
 {
-	Status = STA_DURINGINIT;
 	fileName = "MQ9.txt";
 	minDelay = 0;
 	setUpdateDelay(UPD_MQ9);
 	pinMode(PIN_MQ9, INPUT);
 	
 	// dodać procedurę testu czujnika
-	Status = STA_INITIALIZED;
 	
-	return (Status == STA_INITIALIZED);
+	Initialized = true;
+	return true;
 }
 		
 bool MQ9::update()
 {
-	if (timeForUpdate())
+	if (millis() - lastUpdate > updateDelay && Initialized)
 	{
 		AirQuality = analogRead(PIN_MQ9);
 		
-		successUpdateFinish();
+		SDbuffer += String(AirQuality) + "\r\n";
+		lastUpdate = millis();
 		return true;
 	}
 	else return false;

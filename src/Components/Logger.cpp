@@ -4,20 +4,15 @@
 #include "../src/Structures/Time.h"
 #include "Logger.h"
 #include <SPI.h>
-#include <SD.h>
 #include "../src/config.h"
-#include "../src/utilities.h"
+#include <SD.h>
 
 using namespace SobieskiSat;
 
-String temp_buffer = "";
-
 bool Logger::begin()
 {
-	Status = STA_DURINGINIT;
-	//LogMessage = logMessage;
-	
-	if (SD.begin(PIN_SD))
+	Initialized = false;
+	if (SD.begin(SD_pin))
 	{
 		File sessions = SD.open("SESSIONS.TXT");
 		if (!sessions)
@@ -29,8 +24,7 @@ bool Logger::begin()
 				sessions.close();
 				SD.mkdir("0");
 				rootDir = "0/";
-				
-				Status = STA_INITIALIZED;
+				Initialized = true;
 				return true;
 			}
 			else return false;
@@ -46,8 +40,7 @@ bool Logger::begin()
 			sessions.close();
 			SD.mkdir(String(sessionNo));
 			rootDir = String(sessionNo) + "/";
-			
-			Status = STA_INITIALIZED;
+			Initialized = true;
 			return true;
 		}
 		
@@ -56,67 +49,64 @@ bool Logger::begin()
 	else return false;
 }
 
-bool Logger::save(Sensor& sensor, long& lastSave)
+bool Logger::save(Sensor& sensor)
 {
-	if (Status == STA_INITIALIZED)
+	if (Initialized)
 	{
-		if (sensor.SDbuffer != "")
+	if (sensor.SDbuffer != "")
+	{
+		File file = SD.open(rootDir + sensor.fileName, FILE_WRITE);
+		if (file)
 		{
-			delay(DEL_BEFSAVE);
-			File file = SD.open(rootDir + sensor.fileName, FILE_WRITE);
-			if (file)
-			{
-				file.print(sensor.SDbuffer);
-				sensor.SDbufferClear();
-				file.close();
-				delay(DEL_AFTSAVE);
-				return true;
-			}
-			lastSave = millis();
-			delay(DEL_AFTSAVE);
-			return false;
+			file.print(sensor.SDbuffer);
+			sensor.SDbufferClear();
+			file.close();
+			return true;
+		}
+		return false;
+	}
+	}
+	return false;
+}
+
+bool Logger::logSensor(String message, Sensor& sender)
+{
+	buffer += "[" + String(sender.ID) + "] " + message + "\r\n";
+	SerialUSB.println("[" + String(sender.ID) + "] " + message);
+}
+
+void Logger::addToBuffer(String str, bool onlyUSB)
+{
+	if (onlyUSB)
+	{
+		if (printUSB) SerialUSB.println(str);
+		return;
+	}
+	else
+	{
+		if (Initialized) buffer += str;
+		if (printUSB) SerialUSB.println(str);
+	}
+}
+
+bool Logger::saveBuffer()
+{
+	if (buffer != "")
+	{
+		File file = SD.open(rootDir + "LOG.TXT", FILE_WRITE);
+		if (file)
+		{
+			file.print(buffer);
+			file.close();
+			buffer = "";
+			SerialUSB.println("[L] Logged to SD.");
+			return true;
 		}
 	}
 	return false;
 }
 
-void Logger::logMessage(const String msg)
-{
-	if (LOG_SD == 1) SerialUSB.println(msg);
-	if (LOG_SERIAL == 1)
-	{
-		temp_buffer += msg;
-		temp_buffer += "\r\n";
-	}
-}
-
-bool Logger::saveBuffer(long& lastSave)
-{
-	if (Status == STA_INITIALIZED)
-	{
-		buffer += temp_buffer;
-		if (buffer != "")
-		{
-			delay(DEL_BEFSAVE);
-			File file = SD.open(rootDir + "LOG.TXT", FILE_WRITE);
-			if (file)
-			{
-				file.print(buffer);
-				file.close();
-				buffer = "";
-				temp_buffer = "";
-				delay(DEL_AFTSAVE);
-				return true;
-			}
-			lastSave = millis();
-			delay(DEL_AFTSAVE);
-			return false;
-		}
-	}
-	return false;
-}
-
-bool Logger::timeForSave(long& lastSave, long& lastTransmit)
+bool Logger::timeForSave(long lastSave, long lastTransmit)
 {
 	return (millis() - lastSave > DEL_BETWEENSAVE &&
 			abs(lastSave - lastTransmit) > DEL_SAVETRAN);

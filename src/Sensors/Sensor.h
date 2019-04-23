@@ -9,26 +9,29 @@ namespace SobieskiSat
 	{
 		public:
 		
-		int Status;
+		bool Initialized = false;
 		String SDbuffer;
 		String fileName;
 		char ID;
-		bool newReading;
+		//bool newLog = true;
+		//bool packetReady = false;
 		
-		Sensor();
 		bool begin();
 		bool update();
 		bool setUpdateDelay(int ms);
 		void SDbufferClear();
 		String listReadings();
+		//void loadToSDBuffer(std::initializer_list<float> inputs);
+		static bool (*sendLog)(String message, Sensor& sender);
 		
 		protected:
 		
 		long lastUpdate;
 		int updateDelay;
 		int minDelay;
-		bool timeForUpdate();
-		void successUpdateFinish();
+		int packetSize;
+		int packetCount;
+		//bool IsPacketReady();
 	};
 };
 

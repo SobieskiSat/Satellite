@@ -11,25 +11,23 @@ PHR::PHR() : Sensor() { ID = 'M'; }
 		
 bool PHR::begin()
 {
-	Status = STA_DURINGINIT;
 	fileName = "PHR.txt";
 	minDelay = 0;
 	setUpdateDelay(UPD_PHR);
 	pinMode(PIN_PHR, INPUT);
 	
-	// dodać procedurę testu czujnika
-	Status = STA_INITIALIZED;
-	
-	return (Status == STA_INITIALIZED);
+	Initialized = true;
+	return true;
 }
 		
 bool PHR::update()
 {
-	if (timeForUpdate())
+	if (millis() - lastUpdate > updateDelay && Initialized)
 	{
 		Light = analogRead(PIN_PHR);
 		
-		successUpdateFinish();
+		SDbuffer += String(Light);
+		lastUpdate = millis();
 		return true;
 	}
 	else return false;
