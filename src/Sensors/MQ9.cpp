@@ -28,6 +28,7 @@ bool MQ9::update()
 		
 		SDbuffer += String(AirQuality) + "\r\n";
 		lastUpdate = millis();
+		newReading = true;
 		return true;
 	}
 	return false;

@@ -35,13 +35,14 @@ void Compressor::attach(DataPacket packet)
 	}
 }
 
-DataPacket Compressor::retrieve(String name)
+DataPacket Compressor::retrieve(String name, int& lenght ,float& variable)
 {
 	if (format != "")
 	{
 		int startBit;
 		int endBit;
 		DataPacket found = find(name, startBit, endBit);
+		if (endBit > lenght * 8) return DataPacket("NotSend", 0, 0, 0, 1, -12);
 		unsigned int unbitten = 0;
 		int endByte = endBit / 8;
 		bool finished = false;
@@ -65,6 +66,7 @@ DataPacket Compressor::retrieve(String name)
 			}
 		}
 		found.value = (unbitten / pow(10, found.decimals)) + found.bottomLimit;
+		variable = found.value;
 		return found;
 	}
 	else

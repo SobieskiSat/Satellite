@@ -13,6 +13,7 @@ namespace SobieskiSat
 		String SDbuffer;
 		String fileName;
 		char ID;
+		bool newReading = false;
 		//bool newLog = true;
 		//bool packetReady = false;
 		

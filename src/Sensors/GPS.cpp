@@ -49,7 +49,7 @@ bool GPS::update()
 			
 			
 			//logger.addToBuffer(listReadings(), true);
-			
+			newReading = true;
 			return true;
 		}
 	}

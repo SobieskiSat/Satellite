@@ -80,7 +80,7 @@ bool BMP280::update()
 			lastUpdate = millis();
 			
 			//(*Sensor::sendLog)(listReadings(), *this);
-			
+			newReading = true;
 			return true;
 		}
 	}

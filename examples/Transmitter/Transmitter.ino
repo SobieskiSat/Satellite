@@ -24,6 +24,7 @@ long beepTimer;
 bool state;
 float sendNum = 0;
 bool generated = false;
+bool longerPacket = false;
 
 void setup() {
   SerialUSB.begin(115200);
@@ -56,7 +57,7 @@ void loop() {
   
   gps.update();
   bmp.update();
-  sps.update();
+  if (sps.update()) longerPacket = true;
   dht.update();
   battery.update();
   mq9.update();
@@ -68,38 +69,61 @@ void loop() {
       if (!generated) {generated = true; compressor.generateFormat = true; }
       compressor.clear();
       compressor.attach(DataPacket("SendNum", 0, 255, 0, 0, sendNum));
-      compressor.attach(DataPacket("Latitude", 49, 54.5, 2, 7, gps.Latitude));
-      compressor.attach(DataPacket("Longitude",  14.07, 24.09, 2, 7, gps.Longitude));
+      compressor.attach(DataPacket("Latitude", 50.448214 - 0.4, 50.448214 + 0.4, 2, 7, gps.Latitude));
+      compressor.attach(DataPacket("Longitude",  21.796410 - 0.55, 21.796410 + 0.55, 2, 7, gps.Longitude));
       compressor.attach(DataPacket("Altitude", 0, 1000, 4, 1, gps.Altitude));
       compressor.attach(DataPacket("Pressure", 600, 1200, 4, 4, bmp.Pressure));
       compressor.attach(DataPacket("Temperature", -20, 50, 2, 2, bmp.Temperature));
-      compressor.attach(DataPacket("AirQuality", 0, 1024, 4, 1, mq9.AirQuality));
+      compressor.attach(DataPacket("AirQuality", 0, 1024, 4, 0, mq9.AirQuality));
+      if (sps.newReading)
+      {
+        
       compressor.attach(DataPacket("PM25", 0, 100, 3, 1, sps.PM2_5));
       compressor.attach(DataPacket("PM100", 0, 100, 3, 1, sps.PM10_0));
-      compressor.attach(DataPacket("Humidity", 0, 100, 3, 1, dht.Humidity));
-      compressor.attach(DataPacket("Battery", 0, 1024, 4, 0, battery.Reading));
+      
+      sps.newReading = false;
+      if (dht.newReading)
+      {
+        compressor.attach(DataPacket("Humidity", 0, 100, 3, 1, dht.Humidity));
+        compressor.attach(DataPacket("Battery", 0, 1024, 4, 0, battery.Reading));
+        
+        dht.newReading = false;
+      }
+      }
       compressor.generateFormat = false;
+      SerialUSB.println(battery.Reading);
       Frame frame;
-      SerialUSB.println(compressor.format);
-      frame.print(compressor.data);
+      frame.clear();
+      for (int i = 0; i <= compressor.index / 8; i++)
+        {
+          frame.print(compressor.data[i]);
+        }
       radio.transmit(frame);
       sendNum++;
       
       digitalWrite(13, state);
       state = !state;
+      longerPacket = false;
+
+      gps.newReading = false;
+      bmp.newReading = false;
+      mq9.newReading = false;
+      battery.newReading = false;
+      photo.newReading = false;
+      mq9.newReading = false;
   }
 
   if (millis() - lastSave > 5000)
   {
-    delay(10);
     SerialUSB.println("SD saving");
     logger.save(gps);
     logger.save(bmp);
     logger.save(sps);
     logger.save(dht);
+    logger.save(photo);
+    logger.save(
     logger.saveBuffer();
     lastSave = millis();
-    delay(10);
 
     tone(5, 540, 40);
   }

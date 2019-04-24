@@ -28,6 +28,7 @@ bool BAT::update()
 		
 		SDbuffer += String(Reading) + "\r\n";
 		lastUpdate = millis();
+		newReading = true;
 		return true;
 	}
 	return false;

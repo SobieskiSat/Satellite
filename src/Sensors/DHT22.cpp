@@ -55,7 +55,7 @@ bool DHT22::update()
 		lastUpdate = millis();
 		
 		//logger.addToBuffer(listReadings(), true);
-		
+		newReading = true;
 		return true;
 	}
 	

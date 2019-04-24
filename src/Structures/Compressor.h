@@ -13,7 +13,7 @@ namespace SobieskiSat
 		
 		void clear();
 		void attach(DataPacket packet);
-		DataPacket retrieve(String name);
+		DataPacket retrieve(String name, int& lenght, float& variable);
 		
 		int packetSize = 64;
 		char data[64];

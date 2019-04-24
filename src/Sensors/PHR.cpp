@@ -28,6 +28,7 @@ bool PHR::update()
 		
 		SDbuffer += String(Light) + "\r\n";
 		lastUpdate = millis();
+		newReading = true;
 		return true;
 	}
 	return false;

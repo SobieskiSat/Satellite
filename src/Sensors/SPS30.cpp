@@ -53,7 +53,7 @@ bool SPS30::update()
 		lastUpdate = millis();
 		
 		//logger.addToBuffer(listReadings(), true);
-		
+		newReading = true;
 		return true;
 	}
 	return false;
