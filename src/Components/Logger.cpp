@@ -71,20 +71,20 @@ bool Logger::save(Sensor& sensor)
 bool Logger::logSensor(String message, Sensor& sender)
 {
 	buffer += "[" + String(sender.ID) + "] " + message + "\r\n";
-	SerialUSB.println("[" + String(sender.ID) + "] " + message);
+	//SerialUSB.println("[" + String(sender.ID) + "] " + message);
 }
 
 void Logger::addToBuffer(String str, bool onlyUSB)
 {
 	if (onlyUSB)
 	{
-		if (printUSB) SerialUSB.println(str);
+		//if (printUSB) SerialUSB.println(str);
 		return;
 	}
 	else
 	{
 		if (Initialized) buffer += str;
-		if (printUSB) SerialUSB.println(str);
+		//if (printUSB) SerialUSB.println(str);
 	}
 }
 
@@ -98,7 +98,7 @@ bool Logger::saveBuffer()
 			file.print(buffer);
 			file.close();
 			buffer = "";
-			SerialUSB.println("[L] Logged to SD.");
+			//SerialUSB.println("[L] Logged to SD.");
 			return true;
 		}
 	}

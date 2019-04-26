@@ -23,6 +23,7 @@ Radio radio(10, 12,
             Bandwidth_125000_Hz,    // bandwidth - check with CanSat regulations to set allowed value
             SpreadingFactor_9,      // see provided presentations to determine which setting is the best
             CodingRate_4_8);        // see provided presentations to determine which setting is the best
+Logger logger;
 Compressor compressor;
 bool led_state = true;
 
@@ -39,6 +40,8 @@ float PM25 = 0;
 float PM100 = 0;
 float Humidity = 0;
 float Battery = 0;
+
+long lastSave;
 
 //---------------------------------------------OLED_START_LOGO---------------------------
 #define LOGO_HEIGHT   64
@@ -123,9 +126,9 @@ if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64 ZMI
   }  
   // start radio module  
   radio.begin();
-  
+  logger.begin();
   compressor.clear();
-  compressor.format = "0_8_SendNum_0_255_0_0 8_31_Latitude_50.0482140_50.8482132_2_7 31_55_Longitude_21.2464104_22.3464108_2_7 55_69_Altitude_0.0_1000.0_4_1 69_92_Pressure_600.0000_1200.0000_4_4 92_105_Temperature_-20.00_50.00_2_2 105_115_AirQuality_0_1024_4_0 115_125_PM25_0.0_100.0_3_1 125_135_PM100_0.0_100.0_3_1 135_145_Humidity_0.0_100.0_3_1 145_155_Battery_0_1024_4_0 "; 
+  compressor.format = "0_8_SendNum_0_255_0_0 8_34_Latitude_49.0000000_54.5000000_2_7 34_61_Longitude_14.0699997_24.0900002_2_7 61_75_Altitude_0.0_1000.0_4_1 75_98_Pressure_600.0000_1200.0000_4_4 98_111_Temperature_-20.00_50.00_2_2 111_121_AirQuality_0_1024_4_0 121_131_PM25_0.0_100.0_3_1 131_141_PM100_0.0_100.0_3_1 141_151_Humidity_0.0_100.0_3_1 151_161_Battery_0_1024_4_0 ";
   display.display();
   display.clearDisplay();
   delay(50);
@@ -155,8 +158,7 @@ void loop() {
 
   digitalWrite(13, led_state);
   led_state = !led_state;
-  //lenght -= 1;
-SerialUSB.println(lenght);
+  lenght -= 1;
   compressor.clear();
   // get and print signal level (rssi) 
   //SERIAL PRINT
@@ -202,6 +204,13 @@ SerialUSB.println(lenght);
   
   compressor.clear();
   package_num++;
+  
+  logger.addToBuffer(String(rssi) + "_" + String((int)SendNum) + "_" + String(Latitude, 7) + "_" + String(Longitude, 7) + "_" + String(Altitude, 1) + "_" + String(Pressure, 4) + "_" + String(Temperature, 2) + "_" + String((int)AirQuality) + "_" + String(PM25, 1) + "_" + String(PM100, 1) + "_" + String(Humidity, 1) + "_" + String((int)Battery) + "@" + String(millis()) + "\r\n");   
+  if (millis() - lastSave >= 2000)
+  {
+    logger.saveBuffer();
+    lastSave = millis();
+  }
 }
 
 

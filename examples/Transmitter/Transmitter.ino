@@ -17,7 +17,7 @@ PHR photo;
 MQ9 mq9;
 
 Compressor compressor;
-Player buzzer;
+//Player buzzer;
 
 long lastSave;
 long beepTimer;
@@ -26,12 +26,13 @@ float sendNum = 0;
 bool generated = false;
 bool longerPacket = false;
 
+
 void setup() {
   SerialUSB.begin(115200);
 
   pinMode(13, OUTPUT);
 
-  buzzer.begin(5);
+  //buzzer.begin(5);
 
   compressor.clear();
 
@@ -49,19 +50,20 @@ void setup() {
   
   delay(1000);
 
-  buzzer.play(2);
+  //buzzer.play(2);
   lastSave = millis();
 }
 
 void loop() {
   
   gps.update();
-  bmp.update();
+  if (millis() - lastSave >= 200) bmp.update();
   if (sps.update()) longerPacket = true;
   dht.update();
   battery.update();
   mq9.update();
   photo.update();
+
 
   if (radio.tx_fifo_empty())
   { 
@@ -69,8 +71,8 @@ void loop() {
       if (!generated) {generated = true; compressor.generateFormat = true; }
       compressor.clear();
       compressor.attach(DataPacket("SendNum", 0, 255, 0, 0, sendNum));
-      compressor.attach(DataPacket("Latitude", 50.448214 - 0.4, 50.448214 + 0.4, 2, 7, gps.Latitude));
-      compressor.attach(DataPacket("Longitude",  21.796410 - 0.55, 21.796410 + 0.55, 2, 7, gps.Longitude));
+      compressor.attach(DataPacket("Latitude", 49, 54.5, 2, 7, gps.Latitude));
+      compressor.attach(DataPacket("Longitude",  14.07, 24.09, 2, 7, gps.Longitude));
       compressor.attach(DataPacket("Altitude", 0, 1000, 4, 1, gps.Altitude));
       compressor.attach(DataPacket("Pressure", 600, 1200, 4, 4, bmp.Pressure));
       compressor.attach(DataPacket("Temperature", -20, 50, 2, 2, bmp.Temperature));
@@ -91,16 +93,17 @@ void loop() {
       }
       }
       compressor.generateFormat = false;
-      SerialUSB.println(battery.Reading);
       Frame frame;
       frame.clear();
       for (int i = 0; i <= compressor.index / 8; i++)
         {
           frame.print(compressor.data[i]);
         }
+
+      
+  SerialUSB.println(bmp.Temperature);
       radio.transmit(frame);
       sendNum++;
-      
       digitalWrite(13, state);
       state = !state;
       longerPacket = false;
@@ -121,16 +124,11 @@ void loop() {
     logger.save(sps);
     logger.save(dht);
     logger.save(photo);
-    logger.save(
+    logger.save(battery);
+    logger.save(mq9);
     logger.saveBuffer();
     lastSave = millis();
 
-    tone(5, 540, 40);
-  }
-  
-  if (millis() - beepTimer > 100000)
-  {
-    beepTimer = millis();
-    tone(5, 600, 750);
+    //tone(5, 540, 40);
   }
 }

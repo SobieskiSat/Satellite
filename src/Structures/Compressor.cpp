@@ -17,7 +17,7 @@ void Compressor::clear()
 
 void Compressor::attach(DataPacket packet)
 {
-	unsigned int cropped = (unsigned int)((packet.value - packet.bottomLimit) * pow(10, packet.decimals));
+	unsigned int cropped = (unsigned int)(round((packet.value - packet.bottomLimit) * pow(10, packet.decimals)));
 	unsigned int spread = (unsigned int)((packet.upperLimit - packet.bottomLimit) * pow(10, packet.decimals));
 	int packetBits = 0;
 	while (spread > pow(2, packetBits)) { packetBits++; }
