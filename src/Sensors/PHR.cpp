@@ -24,9 +24,9 @@ bool PHR::update()
 {
 	if (millis() - lastUpdate > updateDelay && Initialized)
 	{
-		Light = (float)analogRead(A1);
+		Light = (float)analogRead(A2);
 		
-		SDbuffer += String(Light) + "\r\n";
+		SDbuffer += String(Light) +" @" + String(millis()) + "\r\n";
 		lastUpdate = millis();
 		newReading = true;
 		return true;

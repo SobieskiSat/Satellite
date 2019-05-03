@@ -43,6 +43,10 @@ float Battery = 0;
 
 long lastSave;
 
+int rssis[79];
+int startAlt = 166;
+int altitudes[79];
+
 //---------------------------------------------OLED_START_LOGO---------------------------
 #define LOGO_HEIGHT   64
 #define LOGO_WIDTH    64
@@ -143,7 +147,6 @@ if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64 ZMI
   display.invertDisplay(true);
     delay(250);
   display.invertDisplay(false);
-    delay(5000);  
 }
 
 void loop() {
@@ -178,8 +181,9 @@ void loop() {
   compressor.retrieve("PM25", lenght, PM25);
   compressor.retrieve("PM100", lenght, PM100);
   compressor.retrieve("Humidity", lenght, Humidity);
+  lenght += 1;
   compressor.retrieve("Battery", lenght, Battery);
-  SerialUSB.println(String(rssi) + "_" + String((int)SendNum) + "_" + String(Latitude, 7) + "_" + String(Longitude, 7) + "_" + String(Altitude, 1) + "_" + String(Pressure, 4) + "_" + String(Temperature, 2) + "_" + String((int)AirQuality) + "_" + String(PM25, 1) + "_" + String(PM100, 1) + "_" + String(Humidity, 1) + "_" + String((int)Battery));
+  SerialUSB.println(String(rssi) + "_" + String((int)SendNum) + "_" + String(Latitude, 7) + "_" + String(Longitude, 7) + "_" + String(Altitude, 1) + "_" + String(Pressure, 4) + "_" + String(Temperature - 2.1, 2) + "_" + String((int)AirQuality) + "_" + String(PM25, 1) + "_" + String(PM100, 1) + "_" + String(Humidity, 1) + "_" + String((int)Battery));
                     
   
   //SerialUSB.println(String(compressor.data));
@@ -189,16 +193,59 @@ void loop() {
   
   display.setTextSize(2);             // Normal 1:1 pixel scale
   display.setCursor(0, 0);
-  display.print("RSSI: ");
-  display.println(rssi);
-  
-  display.print("H: ");
-  display.println(String(Altitude));
+  //display.print("RSSI: ");
+  //display.println(rssi);
+  //display.print("H: ");
+  //display.println(String(Altitude));
+  //display.print("P: ");
+  //display.println(String(package_num) + " " + String((int)SendNum));
 
-  display.setTextSize(1);             // Normal 1:1 pixel scale
 
+  arrayPush(rssis, 79, (-(rssi + 30) * 16.0 / 130.0));
+  display.drawLine(0, 17, 78, 17, 1);
+  for (int i = 0; i < 79; i++)
+  {
+    //display.drawLine(i, 16, i, rssis[i], 1); // solid graph
+    display.drawPixel(i, rssis[i], 1);
+  }
+  display.setCursor(79, 0);
+  display.setTextSize(2);
+  if (rssi > -100) display.print(" ");
+  display.print(String(rssi));
+
+  arrayPush(altitudes, 79, ((Altitude - startAlt) * 16.0 / 2700.0));
+  display.drawLine(0, 34, 78, 34, 1);
+  for (int i = 0; i < 79; i++)
+  {
+    display.drawLine(i, 32, i, 32 - altitudes[i], 1); // solid graph
+    //display.drawPixel(i, rssis[i], 1);
+  }
+  display.setCursor(79, 20);
+  display.setTextSize(2);
+  int relAlt = (int)(Altitude - startAlt);
+  if (relAlt < 10 && relAlt >= 0) display.print(String(" "));
+  if (relAlt < 100 && relAlt >= 0) display.print(String(" "));
+  if (relAlt < 1000 && relAlt >= 0) display.print(String(" "));
+  display.print(String(relAlt));
+
+  display.fillRect(117, 39, 8, 2, 1);
+  display.drawRect(115, 42, 12, 21, 1);
+  int batLvl = Battery * 16.0/1023.0;
+  if (batLvl > 16) batLvl = 16;
+  display.fillRect(117, 61 - batLvl, 8, batLvl, 1);
+    
+  display.setTextSize(1);
+  display.setCursor(0, 37);
   display.print("Packs: ");
-  display.println(String(package_num) + " " + String((int)SendNum));
+  display.print(String((int)package_num));
+  display.print(" ");
+  display.print(String((int)SendNum));
+  display.setCursor(0, 46);
+  display.print("P: " + String(Pressure));
+  display.print(" T: " + String(Temperature - 2.1, 1));
+  display.setCursor(0, 55);
+  display.print("G: " + String((int)AirQuality));
+  display.print(" PM: " + String(PM25, 1) + " " + String(PM100, 1));
   
   display.display();
   
@@ -223,4 +270,13 @@ void loop() {
     logo_bmp, LOGO_WIDTH, LOGO_HEIGHT, 1);
   display.display();
   delay(250);
+}
+
+void arrayPush(int arr[], int lenght, int toAdd)
+{
+  for (int i = 1; i < lenght; i++)
+  {
+    arr[i - 1] = arr[i];
+  }
+  arr[lenght - 1] = toAdd;
 }

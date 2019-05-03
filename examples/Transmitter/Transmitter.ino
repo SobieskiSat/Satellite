@@ -26,7 +26,6 @@ float sendNum = 0;
 bool generated = false;
 bool longerPacket = false;
 
-
 void setup() {
   SerialUSB.begin(115200);
 
@@ -55,7 +54,6 @@ void setup() {
 }
 
 void loop() {
-  
   gps.update();
   if (millis() - lastSave >= 200) bmp.update();
   if (sps.update()) longerPacket = true;
@@ -100,8 +98,6 @@ void loop() {
           frame.print(compressor.data[i]);
         }
 
-      
-  SerialUSB.println(bmp.Temperature);
       radio.transmit(frame);
       sendNum++;
       digitalWrite(13, state);
@@ -129,6 +125,6 @@ void loop() {
     logger.saveBuffer();
     lastSave = millis();
 
-    //tone(5, 540, 40);
+    tone(5, 440, 250);
   }
 }

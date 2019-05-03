@@ -24,9 +24,9 @@ bool BAT::update()
 {
 	if (millis() - lastUpdate > updateDelay && Initialized)
 	{
-		Reading = (float)analogRead(A2);
+		Reading = (float)analogRead(A4);
 		
-		SDbuffer += String(Reading) + "\r\n";
+		SDbuffer += String(Reading) +" @" + String(millis()) + "\r\n";
 		lastUpdate = millis();
 		newReading = true;
 		return true;

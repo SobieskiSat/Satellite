@@ -26,7 +26,7 @@ bool MQ9::update()
 	{
 		AirQuality = (float)analogRead(A0);
 		
-		SDbuffer += String(AirQuality) + "\r\n";
+		SDbuffer += String(AirQuality)  +" @" + String(millis()) + "\r\n";
 		lastUpdate = millis();
 		newReading = true;
 		return true;
